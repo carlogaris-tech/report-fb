@@ -8,6 +8,7 @@
       name="description"
       content="Pannello cliente per reportistica campagne social e integrazione Meta Ads API."
     >
+    <link rel="icon" type="image/png" href="../favicon_OT.png">
     <link rel="stylesheet" href="./styles.css">
     <script src="./script.js" defer></script>
   </head>
@@ -15,7 +16,7 @@
     <main class="app-shell">
       <aside class="sidebar" aria-label="Navigazione report social">
         <a class="brand" href="../">
-          <img src="../asset/officina-tech-logo.png" alt="">
+          <img src="../favicon_OT.png" alt="Officina.tech">
           <span>
             <strong>Officina.tech</strong>
             <small>Report social</small>
@@ -27,8 +28,6 @@
           <a href="#consulta">Consulta per data</a>
           <a href="#campagne">Campagne</a>
           <a href="#andamento">Andamento</a>
-          <a href="#azioni">Azioni</a>
-          <a href="#integrazione">API Meta</a>
         </nav>
 
         <section class="access-card">
@@ -43,17 +42,21 @@
       <section class="workspace">
         <header class="topbar">
           <div>
-            <p class="eyebrow">Dashboard cliente</p>
-            <h1>Report campagne Meta</h1>
+            <p class="eyebrow">Report cliente</p>
+            <h1>Andamento campagne social</h1>
             <p id="clientDescription">
-              Prestazioni aggiornate da Meta Ads per campagne Facebook e Instagram.
+              Dati di andamento delle campagne Facebook e Instagram nel periodo selezionato.
             </p>
           </div>
 
           <div class="top-actions">
+            <div class="fixed-client" aria-label="Cliente">
+              <span>Cliente</span>
+              <strong id="fixedClientName">Salottidea</strong>
+            </div>
             <label>
-              Cliente
-              <select id="clientSelect" aria-label="Seleziona cliente"></select>
+              Campagna
+              <select id="campaignSelect" aria-label="Seleziona campagna attiva"></select>
             </label>
             <label>
               Vista rapida
@@ -72,21 +75,21 @@
         <section class="date-query-panel" id="consulta" aria-label="Consulta dati per data">
           <div>
             <p class="eyebrow">Consulta per data</p>
-            <h2>Interroga il report su un giorno o su un intervallo</h2>
+            <h2>Seleziona giorno o intervallo</h2>
             <p>
-              Inserisci la stessa data nei due campi per vedere click, like,
-              commenti, condivisioni e lead di un singolo giorno.
+              Inserisci la stessa data nei due campi per leggere i dati di un
+              singolo giorno.
             </p>
           </div>
 
           <div class="date-controls">
             <label>
               Dal
-              <input id="dateFrom" type="date" aria-label="Data inizio">
+              <input id="dateFrom" type="date" min="2026-04-01" max="2026-06-30" aria-label="Data inizio">
             </label>
             <label>
               Al
-              <input id="dateTo" type="date" aria-label="Data fine">
+              <input id="dateTo" type="date" min="2026-04-01" max="2026-06-30" aria-label="Data fine">
             </label>
             <button class="primary-button" type="button" id="applyDateFilter">
               Applica filtro
@@ -98,7 +101,7 @@
           <div>
             <span class="status-dot" id="connectionDot"></span>
             <strong id="connectionLabel">Modalita demo</strong>
-            <small id="connectionDetail">Dati dimostrativi, endpoint Meta non configurato.</small>
+            <small id="connectionDetail">Report dimostrativo con valori simulati.</small>
           </div>
           <div>
             <strong id="updatedAt">-</strong>
@@ -127,7 +130,7 @@
           <div class="metric-grid" id="metricGrid"></div>
         </section>
 
-        <section class="content-grid">
+        <section class="report-section">
           <section class="panel" id="campagne">
             <div class="panel-heading split">
               <div>
@@ -156,36 +159,9 @@
               </table>
             </div>
           </section>
-
-          <aside class="panel score-panel">
-            <div class="panel-heading">
-              <p class="eyebrow">Qualita campagna</p>
-              <h2>Indice Officina</h2>
-            </div>
-
-            <div class="score-ring" aria-label="Punteggio campagna">
-              <strong id="scoreValue">0</strong>
-              <span>/100</span>
-            </div>
-
-            <div class="score-bars">
-              <div>
-                <span>Efficienza budget</span>
-                <progress id="budgetScore" max="100" value="0"></progress>
-              </div>
-              <div>
-                <span>Traffico e interesse</span>
-                <progress id="trafficScore" max="100" value="0"></progress>
-              </div>
-              <div>
-                <span>Conversioni</span>
-                <progress id="conversionScore" max="100" value="0"></progress>
-              </div>
-            </div>
-          </aside>
         </section>
 
-        <section class="content-grid">
+        <section class="report-section">
           <section class="panel" id="andamento">
             <div class="panel-heading">
               <p class="eyebrow">Andamento</p>
@@ -199,92 +175,6 @@
             </div>
             <div class="bar-chart" id="barChart" aria-label="Grafico andamento"></div>
           </section>
-
-          <section class="panel recommendation-panel" id="azioni">
-            <div class="panel-heading">
-              <p class="eyebrow">Azioni consigliate</p>
-              <h2>Prossime mosse</h2>
-            </div>
-            <ol id="recommendations"></ol>
-            <button class="primary-button full-button" type="button" id="copySummary">
-              Copia sintesi cliente
-            </button>
-          </section>
-        </section>
-
-        <section class="panel integration-panel" id="integrazione">
-          <div class="panel-heading">
-            <p class="eyebrow">Integrazione API Meta</p>
-            <h2>Collegamento dati in produzione</h2>
-          </div>
-
-          <div class="integration-grid">
-            <div>
-              <h3>Architettura consigliata</h3>
-              <p>
-                Il pannello cliente non deve contenere token Meta. In produzione
-                legge un endpoint privato di Officina.tech, che recupera Insights
-                da Meta Marketing API e restituisce dati gia normalizzati per il
-                cliente autorizzato.
-              </p>
-            </div>
-            <div>
-              <h3>Endpoint atteso</h3>
-              <code id="endpointExample">/api/meta-insights?client=cliente-id&period=last_30d</code>
-              <p>
-                Campi principali: spend, impressions, reach, clicks, ctr, cpc,
-                likes, comments, shares, leads, purchases, revenue, daily
-                breakdown e stato campagna.
-              </p>
-            </div>
-            <div>
-              <h3>Pannello per ogni cliente</h3>
-              <p>
-                Ogni cliente ha un identificativo dedicato, un account ADV Meta
-                associato e una URL condivisibile come
-                <code>?cliente=ristorante-la-piazza</code>.
-              </p>
-            </div>
-          </div>
-
-          <details>
-            <summary>Formato JSON previsto dal proxy</summary>
-            <pre><code>{
-  "clientId": "ristorante-la-piazza",
-  "updatedAt": "2026-06-12T09:30:00.000Z",
-  "campaigns": [
-    {
-      "id": "238...",
-      "name": "Prenotazioni weekend",
-      "status": "ACTIVE",
-      "objective": "Lead generation",
-      "spend": 850.45,
-      "impressions": 118000,
-      "reach": 64200,
-      "clicks": 2180,
-      "likes": 615,
-      "comments": 84,
-      "shares": 53,
-      "leads": 142,
-      "purchases": 0,
-      "revenue": 0,
-      "daily": [
-        {
-          "date": "2026-06-01",
-          "spend": 31.2,
-          "impressions": 4600,
-          "reach": 2500,
-          "clicks": 86,
-          "likes": 31,
-          "comments": 4,
-          "shares": 3,
-          "leads": 6
-        }
-      ]
-    }
-  ]
-}</code></pre>
-          </details>
         </section>
       </section>
     </main>
