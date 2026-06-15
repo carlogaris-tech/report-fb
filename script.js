@@ -1,4 +1,5 @@
-const clientSelect = document.querySelector("#clientSelect");
+const fixedClientName = document.querySelector("#fixedClientName");
+const campaignSelect = document.querySelector("#campaignSelect");
 const periodSelect = document.querySelector("#periodSelect");
 const dateFrom = document.querySelector("#dateFrom");
 const dateTo = document.querySelector("#dateTo");
@@ -17,54 +18,36 @@ const campaignTable = document.querySelector("#campaignTable");
 const connectionDot = document.querySelector("#connectionDot");
 const connectionLabel = document.querySelector("#connectionLabel");
 const connectionDetail = document.querySelector("#connectionDetail");
-const scoreValue = document.querySelector("#scoreValue");
-const scoreRing = document.querySelector(".score-ring");
-const budgetScoreBar = document.querySelector("#budgetScore");
-const trafficScoreBar = document.querySelector("#trafficScore");
-const conversionScoreBar = document.querySelector("#conversionScore");
 const barChart = document.querySelector("#barChart");
 const chartButtons = Array.from(document.querySelectorAll("[data-chart-metric]"));
-const recommendations = document.querySelector("#recommendations");
 const exportCsv = document.querySelector("#exportCsv");
-const copySummary = document.querySelector("#copySummary");
-const endpointExample = document.querySelector("#endpointExample");
 
 const useMockMetaApi = true;
+const mockDateRange = {
+  from: "2026-04-01",
+  to: "2026-06-30",
+};
 
 const clients = [
   {
-    id: "ristorante-la-piazza",
-    name: "Ristorante La Piazza",
+    id: "salottidea",
+    name: "Salottidea",
     description:
-      "Campagne locali per prenotazioni, coperti nel weekend e promozione menu stagionali.",
+      "Andamento delle campagne social nel periodo selezionato.",
     metaAccount: "act_123456789",
-    endpoint: "/api/meta-insights",
-  },
-  {
-    id: "hotel-belvedere",
-    name: "Hotel Belvedere",
-    description:
-      "Campagne Instagram e Facebook per richieste soggiorno, offerte family e traffico verso landing.",
-    metaAccount: "act_987654321",
-    endpoint: "/api/meta-insights",
-  },
-  {
-    id: "officina-demo",
-    name: "Officina.tech Demo",
-    description:
-      "Vista dimostrativa per presentare reportistica, KPI e integrazione Meta Ads ai clienti.",
-    metaAccount: "act_demo",
     endpoint: "/api/meta-insights",
   },
 ];
 
 const fallbackReports = {
-  "ristorante-la-piazza": {
+  salottidea: {
+    date_start: mockDateRange.from,
+    date_stop: mockDateRange.to,
     updatedAt: "2026-06-12T08:45:00.000Z",
     campaigns: [
       {
         id: "cmp-101",
-        name: "Prenotazioni weekend",
+        name: "Promozione showroom",
         status: "ACTIVE",
         objective: "Lead generation",
         spend: 846.5,
@@ -93,7 +76,7 @@ const fallbackReports = {
       },
       {
         id: "cmp-102",
-        name: "Menu degustazione",
+        name: "Collezione divani",
         status: "ACTIVE",
         objective: "Traffico landing",
         spend: 392.2,
@@ -122,7 +105,7 @@ const fallbackReports = {
       },
       {
         id: "cmp-103",
-        name: "Retargeting visitatori sito",
+        name: "Retargeting sito",
         status: "PAUSED",
         objective: "Remarketing",
         spend: 126.8,
@@ -151,132 +134,6 @@ const fallbackReports = {
       },
     ],
   },
-  "hotel-belvedere": {
-    updatedAt: "2026-06-12T07:50:00.000Z",
-    campaigns: [
-      {
-        id: "cmp-201",
-        name: "Estate in famiglia",
-        status: "ACTIVE",
-        objective: "Lead generation",
-        spend: 1285.1,
-        impressions: 176200,
-        reach: 91200,
-        clicks: 3180,
-        leads: 188,
-        purchases: 0,
-        revenue: 0,
-        daily: [
-          ["2026-05-30", 48, 122, 6],
-          ["2026-05-31", 54, 136, 8],
-          ["2026-06-01", 57, 144, 8],
-          ["2026-06-02", 62, 153, 9],
-          ["2026-06-03", 66, 164, 10],
-          ["2026-06-04", 70, 171, 11],
-          ["2026-06-05", 74, 184, 12],
-          ["2026-06-06", 82, 198, 14],
-          ["2026-06-07", 88, 214, 15],
-          ["2026-06-08", 92, 228, 16],
-          ["2026-06-09", 96, 235, 17],
-          ["2026-06-10", 100, 244, 18],
-          ["2026-06-11", 106, 257, 20],
-          ["2026-06-12", 110, 270, 22],
-        ],
-      },
-      {
-        id: "cmp-202",
-        name: "Weekend benessere",
-        status: "ACTIVE",
-        objective: "Conversioni",
-        spend: 934.6,
-        impressions: 104300,
-        reach: 50240,
-        clicks: 2054,
-        leads: 92,
-        purchases: 31,
-        revenue: 8650,
-        daily: [
-          ["2026-05-30", 31, 84, 3],
-          ["2026-05-31", 38, 90, 4],
-          ["2026-06-01", 42, 99, 4],
-          ["2026-06-02", 46, 106, 5],
-          ["2026-06-03", 50, 112, 5],
-          ["2026-06-04", 55, 121, 6],
-          ["2026-06-05", 58, 130, 6],
-          ["2026-06-06", 64, 141, 7],
-          ["2026-06-07", 68, 149, 7],
-          ["2026-06-08", 70, 154, 8],
-          ["2026-06-09", 73, 162, 8],
-          ["2026-06-10", 76, 170, 9],
-          ["2026-06-11", 80, 181, 10],
-          ["2026-06-12", 83, 190, 10],
-        ],
-      },
-    ],
-  },
-  "officina-demo": {
-    updatedAt: "2026-06-12T09:15:00.000Z",
-    campaigns: [
-      {
-        id: "cmp-301",
-        name: "Demo acquisizione lead",
-        status: "ACTIVE",
-        objective: "Lead generation",
-        spend: 620,
-        impressions: 82000,
-        reach: 41000,
-        clicks: 1540,
-        leads: 96,
-        purchases: 0,
-        revenue: 0,
-        daily: [
-          ["2026-05-30", 22, 61, 3],
-          ["2026-05-31", 25, 66, 4],
-          ["2026-06-01", 27, 72, 4],
-          ["2026-06-02", 30, 78, 5],
-          ["2026-06-03", 32, 84, 5],
-          ["2026-06-04", 35, 91, 6],
-          ["2026-06-05", 38, 98, 6],
-          ["2026-06-06", 42, 107, 7],
-          ["2026-06-07", 45, 112, 7],
-          ["2026-06-08", 48, 119, 8],
-          ["2026-06-09", 51, 126, 8],
-          ["2026-06-10", 55, 134, 9],
-          ["2026-06-11", 58, 141, 9],
-          ["2026-06-12", 62, 151, 10],
-        ],
-      },
-      {
-        id: "cmp-302",
-        name: "Demo retargeting",
-        status: "ACTIVE",
-        objective: "Remarketing",
-        spend: 210,
-        impressions: 28600,
-        reach: 12300,
-        clicks: 710,
-        leads: 34,
-        purchases: 12,
-        revenue: 1560,
-        daily: [
-          ["2026-05-30", 8, 24, 1],
-          ["2026-05-31", 9, 27, 1],
-          ["2026-06-01", 10, 30, 1],
-          ["2026-06-02", 11, 34, 2],
-          ["2026-06-03", 12, 37, 2],
-          ["2026-06-04", 13, 40, 2],
-          ["2026-06-05", 14, 43, 2],
-          ["2026-06-06", 15, 47, 2],
-          ["2026-06-07", 16, 50, 3],
-          ["2026-06-08", 17, 53, 3],
-          ["2026-06-09", 18, 56, 3],
-          ["2026-06-10", 19, 59, 3],
-          ["2026-06-11", 20, 62, 3],
-          ["2026-06-12", 21, 66, 4],
-        ],
-      },
-    ],
-  },
 };
 
 let currentClient = clients[0];
@@ -284,6 +141,7 @@ let currentFullReport = fallbackReports[currentClient.id];
 let currentReport = fallbackReports[currentClient.id];
 let activeChartMetric = "spend";
 let currentConnectionMode = "mock";
+let selectedCampaignId = "all";
 
 function escapeHtml(text) {
   const div = document.createElement("div");
@@ -449,7 +307,10 @@ function getDateBounds(report) {
 }
 
 function isoDate(date) {
-  return date.toISOString().slice(0, 10);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
 
 function addDays(value, amount) {
@@ -460,7 +321,7 @@ function addDays(value, amount) {
 
 function getQuickRange(report, period) {
   const bounds = getDateBounds(report);
-  const max = bounds.max || isoDate(new Date());
+  const max = report?.date_stop || bounds.max || mockDateRange.to || isoDate(new Date());
   const maxDate = new Date(`${max}T00:00:00`);
 
   if (period === "last_7d") {
@@ -544,10 +405,16 @@ function getCampaignForRange(campaign, range) {
 
 function getFilteredReport(report) {
   const range = getSelectedRange();
+  const dateFilteredCampaigns = report.campaigns.map((campaign) =>
+    getCampaignForRange(campaign, range)
+  );
 
   return {
     ...report,
-    campaigns: report.campaigns.map((campaign) => getCampaignForRange(campaign, range)),
+    campaigns:
+      selectedCampaignId === "all"
+        ? dateFilteredCampaigns
+        : dateFilteredCampaigns.filter((campaign) => campaign.id === selectedCampaignId),
   };
 }
 
@@ -556,6 +423,8 @@ function normalizeReport(payload, fallback) {
 
   return {
     updatedAt: payload?.updatedAt || payload?.updated_time || new Date().toISOString(),
+    date_start: payload?.date_start || fallback?.date_start || mockDateRange.from,
+    date_stop: payload?.date_stop || fallback?.date_stop || mockDateRange.to,
     campaigns: sourceCampaigns.map(normalizeCampaign),
   };
 }
@@ -599,20 +468,6 @@ function getTotals(report) {
   return totals;
 }
 
-function getScoreParts(totals) {
-  const budget = clamp(100 - totals.cpc * 45 - totals.cpl * 1.4 + totals.roas * 12);
-  const traffic = clamp(totals.ctr * 22 + Math.min(30, totals.reach / 2800));
-  const conversionRate = totals.clicks > 0 ? (totals.leads / totals.clicks) * 100 : 0;
-  const conversion = clamp(conversionRate * 13 + totals.purchases * 2 + totals.roas * 8);
-
-  return {
-    budget,
-    traffic,
-    conversion,
-    total: clamp((budget + traffic + conversion) / 3),
-  };
-}
-
 function aggregateDaily(report) {
   const byDate = new Map();
 
@@ -638,10 +493,23 @@ function aggregateDaily(report) {
     .slice(-14);
 }
 
-function renderClientOptions() {
-  clientSelect.innerHTML = clients
-    .map((client) => `<option value="${client.id}">${escapeHtml(client.name)}</option>`)
-    .join("");
+function renderCampaignOptions(report) {
+  const activeCampaignsList = report.campaigns.filter((campaign) => campaign.status === "ACTIVE");
+  const hasSelectedCampaign = activeCampaignsList.some(
+    (campaign) => campaign.id === selectedCampaignId
+  );
+
+  if (selectedCampaignId !== "all" && !hasSelectedCampaign) {
+    selectedCampaignId = "all";
+  }
+
+  campaignSelect.innerHTML = [
+    '<option value="all">Tutte le campagne</option>',
+    ...activeCampaignsList.map(
+      (campaign) => `<option value="${escapeHtml(campaign.id)}">${escapeHtml(campaign.name)}</option>`
+    ),
+  ].join("");
+  campaignSelect.value = selectedCampaignId;
 }
 
 function renderStatus(mode, detail) {
@@ -652,26 +520,26 @@ function renderStatus(mode, detail) {
   if (mode === "mock") {
     connectionDot.classList.add("is-live");
     connectionDot.classList.remove("is-error");
-    connectionLabel.textContent = "API Meta demo";
+    connectionLabel.textContent = "Dati demo";
     connectionDetail.textContent =
-      detail || "Chiamata simulata attiva: dati mock pronti per demo cliente.";
+      detail || "Report dimostrativo con valori simulati.";
     return;
   }
 
   if (mode === "live") {
-    connectionLabel.textContent = "API Meta collegata";
-    connectionDetail.textContent = detail || "Dati aggiornati tramite endpoint server.";
+    connectionLabel.textContent = "Dati aggiornati";
+    connectionDetail.textContent = detail || "Report aggiornato.";
     return;
   }
 
   if (mode === "error") {
-    connectionLabel.textContent = "Endpoint non disponibile";
-    connectionDetail.textContent = detail || "Uso dati demo finche il proxy Meta non risponde.";
+    connectionLabel.textContent = "Dati demo";
+    connectionDetail.textContent = detail || "Report dimostrativo con valori simulati.";
     return;
   }
 
-  connectionLabel.textContent = "Modalita demo";
-  connectionDetail.textContent = detail || "Dati dimostrativi, endpoint Meta non configurato.";
+  connectionLabel.textContent = "Dati demo";
+  connectionDetail.textContent = detail || "Report dimostrativo con valori simulati.";
 }
 
 function renderMetrics(totals) {
@@ -731,16 +599,6 @@ function renderCampaigns(report) {
     .join("");
 }
 
-function renderScore(totals) {
-  const scores = getScoreParts(totals);
-
-  scoreValue.textContent = scores.total;
-  scoreRing.style.setProperty("--score", scores.total);
-  budgetScoreBar.value = scores.budget;
-  trafficScoreBar.value = scores.traffic;
-  conversionScoreBar.value = scores.conversion;
-}
-
 function renderChart(report) {
   const days = aggregateDaily(report);
   const max = Math.max(...days.map((day) => day[activeChartMetric]), 1);
@@ -762,46 +620,6 @@ function renderChart(report) {
     .join("");
 }
 
-function buildRecommendations(totals, report) {
-  const items = [];
-  const pausedCampaigns = report.campaigns.filter((campaign) => campaign.status !== "ACTIVE");
-  const ctr = totals.ctr;
-  const conversionRate = totals.clicks > 0 ? (totals.leads / totals.clicks) * 100 : 0;
-
-  if (ctr < 1.2) {
-    items.push("Aggiornare creativita e messaggio: il CTR e sotto soglia, quindi il pubblico vede ma interagisce poco.");
-  } else {
-    items.push("Il livello di interesse e buono: conviene isolare le creativita migliori e replicarne formato e promessa.");
-  }
-
-  if (totals.cpl > 9) {
-    items.push("Rivedere segmenti e landing: il costo per lead e alto rispetto al volume generato.");
-  } else if (totals.leads > 0) {
-    items.push("Il costo per lead e sostenibile: valutare aumento budget graduale sulle campagne con migliore conversione.");
-  }
-
-  if (conversionRate < 4 && totals.clicks > 500) {
-    items.push("Molti click non diventano lead: controllare form, velocita pagina, tracciamento eventi e coerenza annuncio-landing.");
-  }
-
-  if (totals.roas > 2) {
-    items.push("Il ritorno tracciato e positivo: mantenere retargeting attivo e separare pubblici caldi da pubblici freddi.");
-  }
-
-  if (pausedCampaigns.length > 0) {
-    items.push(`Verificare ${pausedCampaigns.length} campagna in pausa prima del prossimo report cliente.`);
-  }
-
-  items.push("Nel report mensile aggiungere una nota qualitativa: cosa ha funzionato, cosa cambiamo, quale decisione serve al cliente.");
-  return items.slice(0, 5);
-}
-
-function renderRecommendations(totals, report) {
-  recommendations.innerHTML = buildRecommendations(totals, report)
-    .map((item) => `<li>${escapeHtml(item)}</li>`)
-    .join("");
-}
-
 function renderDashboard(mode = "demo", detail = "") {
   const totals = getTotals(currentReport);
   const active = currentReport.campaigns.filter((campaign) => campaign.status === "ACTIVE").length;
@@ -817,14 +635,11 @@ function renderDashboard(mode = "demo", detail = "") {
     getSelectedRange().from === getSelectedRange().to
       ? formatDate(getSelectedRange().from)
       : `${formatDate(getSelectedRange().from)} - ${formatDate(getSelectedRange().to)}`;
-  endpointExample.textContent = `${currentClient.endpoint}?client=${currentClient.id}&period=${periodSelect.value}&date_start=${getSelectedRange().from}&date_stop=${getSelectedRange().to}`;
 
   renderStatus(mode, detail);
   renderMetrics(totals);
   renderCampaigns(currentReport);
-  renderScore(totals);
   renderChart(currentReport);
-  renderRecommendations(totals, currentReport);
 }
 
 function randomInt(min, max) {
@@ -833,6 +648,22 @@ function randomInt(min, max) {
 
 function randomFloat(min, max, digits = 2) {
   return Number((Math.random() * (max - min) + min).toFixed(digits));
+}
+
+function seededRatio(seed) {
+  let hash = 0;
+
+  for (let index = 0; index < seed.length; index += 1) {
+    hash = (hash << 5) - hash + seed.charCodeAt(index);
+    hash |= 0;
+  }
+
+  const value = Math.sin(Math.abs(hash)) * 10000;
+  return value - Math.floor(value);
+}
+
+function seededFloat(seed, min, max, digits = 2) {
+  return Number((seededRatio(seed) * (max - min) + min).toFixed(digits));
 }
 
 function listDates(from, to) {
@@ -848,28 +679,50 @@ function listDates(from, to) {
 }
 
 function buildRandomDailySeries(campaign, range) {
-  const dates = listDates(range.from, range.to);
+  const safeRange = {
+    from: range.from || mockDateRange.from,
+    to: range.to || range.from || mockDateRange.to,
+  };
+  const dates = listDates(safeRange.from, safeRange.to);
   const baseClicks = Math.max(18, Math.round((campaign.clicks || 800) / 18));
   const baseSpend = Math.max(7, (campaign.spend || 300) / 18);
 
   return dates.map((date, index) => {
+    const seed = `${campaign.id}-${date}`;
+    const month = new Date(`${date}T00:00:00`).getMonth() + 1;
+    const monthBoost = month === 4 ? 0.82 : month === 5 ? 1 : month === 6 ? 1.18 : 0.9;
     const weekendBoost = [5, 6].includes(new Date(`${date}T00:00:00`).getDay()) ? 1.25 : 1;
-    const trendBoost = 1 + index * 0.012;
-    const clicks = Math.max(8, Math.round(baseClicks * randomFloat(0.65, 1.45) * weekendBoost * trendBoost));
-    const cpc = randomFloat(0.18, 0.74);
+    const trendBoost = 1 + index * 0.004;
+    const clicks = Math.max(
+      8,
+      Math.round(
+        baseClicks *
+          seededFloat(`${seed}-clicks`, 0.65, 1.45) *
+          monthBoost *
+          weekendBoost *
+          trendBoost
+      )
+    );
+    const cpc = seededFloat(`${seed}-cpc`, 0.18, 0.74);
     const spend = Number((clicks * cpc).toFixed(2));
-    const impressions = Math.round(clicks * randomFloat(34, 78));
-    const reach = Math.round(impressions * randomFloat(0.45, 0.78));
-    const likes = Math.round(clicks * randomFloat(0.22, 0.58));
-    const comments = Math.max(0, Math.round(likes * randomFloat(0.04, 0.16)));
-    const shares = Math.max(0, Math.round(likes * randomFloat(0.03, 0.13)));
-    const leads = Math.max(0, Math.round(clicks * randomFloat(0.035, 0.105)));
-    const purchases = campaign.purchases > 0 ? Math.max(0, Math.round(leads * randomFloat(0.08, 0.28))) : 0;
-    const revenue = purchases > 0 ? Number((purchases * randomFloat(55, 210)).toFixed(2)) : 0;
+    const impressions = Math.round(clicks * seededFloat(`${seed}-impressions`, 34, 78));
+    const reach = Math.round(impressions * seededFloat(`${seed}-reach`, 0.45, 0.78));
+    const likes = Math.round(clicks * seededFloat(`${seed}-likes`, 0.22, 0.58));
+    const comments = Math.max(0, Math.round(likes * seededFloat(`${seed}-comments`, 0.04, 0.16)));
+    const shares = Math.max(0, Math.round(likes * seededFloat(`${seed}-shares`, 0.03, 0.13)));
+    const leads = Math.max(0, Math.round(clicks * seededFloat(`${seed}-leads`, 0.035, 0.105)));
+    const purchases =
+      campaign.purchases > 0
+        ? Math.max(0, Math.round(leads * seededFloat(`${seed}-purchases`, 0.08, 0.28)))
+        : 0;
+    const revenue =
+      purchases > 0
+        ? Number((purchases * seededFloat(`${seed}-revenue`, 55, 210)).toFixed(2))
+        : 0;
 
     return {
       date,
-      spend: Math.max(spend, randomFloat(baseSpend * 0.45, baseSpend * 0.75)),
+      spend: Math.max(spend, seededFloat(`${seed}-spend`, baseSpend * 0.45, baseSpend * 0.75)),
       impressions,
       reach,
       clicks,
@@ -961,8 +814,9 @@ async function loadReport() {
     const payload = await mockMetaInsightsRequest(currentClient.id, range);
     currentFullReport = normalizeReport(payload, fallback);
     syncDateInputsFromPeriod(currentFullReport);
+    renderCampaignOptions(currentFullReport);
     currentReport = getFilteredReport(currentFullReport);
-    renderDashboard("mock", "Chiamata API Meta simulata, pronta per sostituire il mock con il backend reale.");
+    renderDashboard("mock", "Report dimostrativo con dati simulati.");
     return;
   }
 
@@ -972,29 +826,26 @@ async function loadReport() {
     const payload = await response.json();
     currentFullReport = normalizeReport(payload, fallback);
     syncDateInputsFromPeriod(currentFullReport);
+    renderCampaignOptions(currentFullReport);
     currentReport = getFilteredReport(currentFullReport);
-    renderDashboard("live", "Dati caricati dal proxy API Meta.");
+    renderDashboard("live", "Report aggiornato.");
   } catch (error) {
     currentFullReport = normalizeReport(fallback, fallback);
     syncDateInputsFromPeriod(currentFullReport);
+    renderCampaignOptions(currentFullReport);
     currentReport = getFilteredReport(currentFullReport);
-    renderDashboard("error", "Il proxy Meta non e ancora attivo: sto mostrando dati demo.");
+    renderDashboard("error", "Report dimostrativo con dati simulati.");
   }
 }
 
-function selectClient(clientId, updateUrl = true) {
-  currentClient = clients.find((client) => client.id === clientId) || clients[0];
-  clientSelect.value = currentClient.id;
+function initializeReport() {
+  currentClient = clients[0];
+  fixedClientName.textContent = currentClient.name;
+  selectedCampaignId = "all";
   currentFullReport = normalizeReport(fallbackReports[currentClient.id], fallbackReports[currentClient.id]);
   syncDateInputsFromPeriod(currentFullReport);
+  renderCampaignOptions(currentFullReport);
   currentReport = getFilteredReport(currentFullReport);
-
-  if (updateUrl) {
-    const url = new URL(window.location.href);
-    url.searchParams.set("cliente", currentClient.id);
-    window.history.replaceState({}, "", url);
-  }
-
   loadReport();
 }
 
@@ -1050,57 +901,26 @@ function exportCurrentCsv() {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = `report-social-${currentClient.id}-${periodSelect.value}.csv`;
+  const campaignSlug = selectedCampaignId === "all" ? "tutte-campagne" : selectedCampaignId;
+  link.download = `report-social-${currentClient.id}-${campaignSlug}-${periodSelect.value}.csv`;
   link.click();
   URL.revokeObjectURL(url);
 }
 
-function buildClientSummary() {
-  const totals = getTotals(currentReport);
-  const scores = getScoreParts(totals);
-  return [
-    `Report campagne Meta - ${currentClient.name}`,
-    `Periodo: ${periodSelect.options[periodSelect.selectedIndex].textContent}`,
-    `Date consultate: ${formatDate(getSelectedRange().from)} - ${formatDate(getSelectedRange().to)}`,
-    `Spesa: ${formatCurrency(totals.spend)}`,
-    `Reach: ${formatNumber(totals.reach)}`,
-    `Click: ${formatNumber(totals.clicks)} - CTR ${formatDecimal(totals.ctr)}% - CPC ${formatCurrency(totals.cpc)}`,
-    `Like: ${formatNumber(totals.likes)} - Commenti: ${formatNumber(totals.comments)} - Condivisioni: ${formatNumber(totals.shares)}`,
-    `Lead: ${formatNumber(totals.leads)} - CPL ${formatCurrency(totals.cpl)}`,
-    `Indice Officina: ${scores.total}/100`,
-    `Prossima azione: ${buildRecommendations(totals, currentReport)[0]}`,
-  ].join("\n");
-}
+initializeReport();
 
-async function copyClientSummary() {
-  const summary = buildClientSummary();
-
-  try {
-    await navigator.clipboard.writeText(summary);
-    copySummary.textContent = "Sintesi copiata";
-    setTimeout(() => {
-      copySummary.textContent = "Copia sintesi cliente";
-    }, 1800);
-  } catch {
-    window.alert(summary);
-  }
-}
-
-renderClientOptions();
-
-const initialClient = new URLSearchParams(window.location.search).get("cliente") || clients[0].id;
-selectClient(initialClient, false);
-
-clientSelect.addEventListener("change", () => selectClient(clientSelect.value));
+campaignSelect.addEventListener("change", () => {
+  selectedCampaignId = campaignSelect.value;
+  currentReport = getFilteredReport(currentFullReport);
+  renderDashboard(currentConnectionMode);
+});
 periodSelect.addEventListener("change", loadReport);
 refreshData.addEventListener("click", loadReport);
 applyDateFilter.addEventListener("click", () => {
   periodSelect.value = "custom";
-  currentReport = getFilteredReport(currentFullReport);
-  renderDashboard(currentConnectionMode);
+  loadReport();
 });
 exportCsv.addEventListener("click", exportCurrentCsv);
-copySummary.addEventListener("click", copyClientSummary);
 
 chartButtons.forEach((button) => {
   button.addEventListener("click", () => {
