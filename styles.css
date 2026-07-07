@@ -158,6 +158,7 @@ a {
 .content-grid > *,
 .status-strip > *,
 .metric-grid > *,
+.engagement-grid > *,
 .integration-grid > *,
 .panel,
 .client-panel {
@@ -170,6 +171,7 @@ a {
 .report-section,
 .content-grid,
 .metric-grid,
+.engagement-grid,
 .top-actions,
 .date-controls,
 .integration-grid {
@@ -504,6 +506,48 @@ button {
   color: var(--coral);
 }
 
+.engagement-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.engagement-card {
+  min-height: 132px;
+  display: grid;
+  align-content: space-between;
+  gap: 14px;
+  padding: 17px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(200, 255, 99, 0.13), transparent 42%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.035));
+}
+
+.engagement-card span,
+.engagement-card small {
+  display: block;
+}
+
+.engagement-card span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.engagement-card strong {
+  color: var(--lime);
+  font-size: clamp(1.6rem, 3vw, 2.35rem);
+  line-height: 1;
+}
+
+.engagement-card small {
+  color: #c9d8ea;
+  line-height: 1.4;
+  font-weight: 760;
+}
+
 .report-section {
   gap: 22px;
   margin-top: 22px;
@@ -700,6 +744,83 @@ progress::-moz-progress-bar {
   text-align: center;
 }
 
+.follower-chart {
+  --follower-columns: 14;
+  min-height: 330px;
+  display: grid;
+  grid-template-columns: repeat(var(--follower-columns), minmax(34px, 1fr));
+  align-items: stretch;
+  gap: 9px;
+  padding: 12px 8px 0;
+  border-top: 1px solid var(--line);
+  overflow-x: auto;
+}
+
+.follower-day {
+  min-height: 296px;
+  display: grid;
+  grid-template-rows: 24px 1fr 24px 20px;
+  align-items: center;
+  gap: 6px;
+}
+
+.follower-bars {
+  position: relative;
+  height: 208px;
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  align-items: end;
+}
+
+.follower-baseline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.follower-bar {
+  width: 100%;
+  min-height: 4px;
+  border-radius: 8px;
+}
+
+.follower-bar.is-gain {
+  align-self: end;
+  background: linear-gradient(180deg, var(--lime), #7dd3fc);
+}
+
+.follower-bar.is-loss {
+  align-self: start;
+  background: linear-gradient(180deg, rgba(255, 138, 112, 0.92), rgba(255, 138, 112, 0.42));
+}
+
+.follower-value {
+  display: block;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 820;
+  text-align: center;
+}
+
+.follower-value.is-gain,
+.follower-value.is-net {
+  color: var(--lime);
+}
+
+.follower-value.is-net {
+  color: #d7e5f7;
+}
+
+.follower-day small {
+  display: block;
+  color: var(--muted);
+  font-size: 0.72rem;
+  text-align: center;
+}
+
 ol {
   margin: 0;
   padding-left: 22px;
@@ -775,7 +896,7 @@ pre code {
   }
 
   .sidebar nav {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
   }
 
   .access-card {
@@ -838,6 +959,7 @@ pre code {
   .date-controls,
   .status-strip,
   .metric-grid,
+  .engagement-grid,
   .sidebar nav {
     grid-template-columns: 1fr;
   }
@@ -849,5 +971,9 @@ pre code {
   .bar-chart {
     grid-template-columns: repeat(7, minmax(26px, 1fr));
     overflow-x: auto;
+  }
+
+  .follower-chart {
+    grid-template-columns: repeat(var(--follower-columns), minmax(42px, 1fr));
   }
 }
