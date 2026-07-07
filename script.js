@@ -19,6 +19,8 @@ const connectionDot = document.querySelector("#connectionDot");
 const connectionLabel = document.querySelector("#connectionLabel");
 const connectionDetail = document.querySelector("#connectionDetail");
 const barChart = document.querySelector("#barChart");
+const engagementGrid = document.querySelector("#engagementGrid");
+const followerChart = document.querySelector("#followerChart");
 const chartButtons = Array.from(document.querySelectorAll("[data-chart-metric]"));
 const exportCsv = document.querySelector("#exportCsv");
 
@@ -216,6 +218,8 @@ function normalizeDaily(item) {
       shares: Number(item[8]) || 0,
       purchases: Number(item[9]) || 0,
       revenue: Number(item[10]) || 0,
+      followersGained: Number(item[11]) || 0,
+      followersLost: Number(item[12]) || 0,
     };
   }
 
@@ -231,6 +235,8 @@ function normalizeDaily(item) {
     leads: Number(item.leads || item.lead || item.actions_lead) || 0,
     purchases: Number(item.purchases || item.purchase) || 0,
     revenue: Number(item.revenue || item.purchase_value) || 0,
+    followersGained: Number(item.followersGained || item.followers_gained || item.follows) || 0,
+    followersLost: Number(item.followersLost || item.followers_lost || item.unfollows) || 0,
   };
 }
 
@@ -248,6 +254,8 @@ function enrichDailyMetrics(campaign, daily) {
     const likes = day.likes || Math.round(day.clicks * 0.32 + day.leads * 1.6);
     const comments = day.comments || Math.round(day.leads * 0.42 + day.clicks * 0.015);
     const shares = day.shares || Math.round(likes * 0.13);
+    const followersGained = day.followersGained || Math.round(day.leads * 0.32 + day.clicks * 0.018);
+    const followersLost = day.followersLost || Math.round(day.clicks * 0.006);
 
     return {
       ...day,
@@ -256,6 +264,8 @@ function enrichDailyMetrics(campaign, daily) {
       likes,
       comments,
       shares,
+      followersGained,
+      followersLost,
       purchases: day.purchases || Math.round(campaign.purchases * leadWeight),
       revenue: day.revenue || Number((campaign.revenue * leadWeight).toFixed(2)),
     };
@@ -270,6 +280,8 @@ function normalizeCampaign(campaign) {
   const likes = Number(campaign.likes || campaign.post_reactions || campaign.reactions || 0) || 0;
   const comments = Number(campaign.comments || 0) || 0;
   const shares = Number(campaign.shares || 0) || 0;
+  const followersGained = Number(campaign.followersGained || campaign.followers_gained || 0) || 0;
+  const followersLost = Number(campaign.followersLost || campaign.followers_lost || 0) || 0;
   const normalized = {
     id: campaign.id || campaign.campaign_id || crypto.randomUUID(),
     name: campaign.name || campaign.campaign_name || "Campagna senza nome",
@@ -282,6 +294,8 @@ function normalizeCampaign(campaign) {
     likes,
     comments,
     shares,
+    followersGained,
+    followersLost,
     leads,
     purchases: Number(campaign.purchases || 0) || 0,
     revenue: Number(campaign.revenue || campaign.purchase_value || 0) || 0,
@@ -381,6 +395,8 @@ function getCampaignForRange(campaign, range) {
       acc.likes += day.likes;
       acc.comments += day.comments;
       acc.shares += day.shares;
+      acc.followersGained += day.followersGained;
+      acc.followersLost += day.followersLost;
       acc.leads += day.leads;
       acc.purchases += day.purchases;
       acc.revenue += day.revenue;
@@ -395,6 +411,8 @@ function getCampaignForRange(campaign, range) {
       likes: 0,
       comments: 0,
       shares: 0,
+      followersGained: 0,
+      followersLost: 0,
       leads: 0,
       purchases: 0,
       revenue: 0,
@@ -439,6 +457,8 @@ function getTotals(report) {
       acc.likes += campaign.likes;
       acc.comments += campaign.comments;
       acc.shares += campaign.shares;
+      acc.followersGained += campaign.followersGained;
+      acc.followersLost += campaign.followersLost;
       acc.leads += campaign.leads;
       acc.purchases += campaign.purchases;
       acc.revenue += campaign.revenue;
@@ -452,6 +472,8 @@ function getTotals(report) {
       likes: 0,
       comments: 0,
       shares: 0,
+      followersGained: 0,
+      followersLost: 0,
       leads: 0,
       purchases: 0,
       revenue: 0,
@@ -464,11 +486,12 @@ function getTotals(report) {
   totals.roas = totals.spend > 0 ? totals.revenue / totals.spend : 0;
   totals.engagement = totals.likes + totals.comments + totals.shares;
   totals.engagementRate =
-    totals.impressions > 0 ? (totals.engagement / totals.impressions) * 100 : 0;
+    totals.reach > 0 ? (totals.engagement / totals.reach) * 100 : 0;
+  totals.netFollowers = totals.followersGained - totals.followersLost;
   return totals;
 }
 
-function aggregateDaily(report) {
+function aggregateDaily(report, limit = 14) {
   const byDate = new Map();
 
   report.campaigns.forEach((campaign) => {
@@ -478,19 +501,30 @@ function aggregateDaily(report) {
         spend: 0,
         clicks: 0,
         likes: 0,
+        comments: 0,
+        shares: 0,
         leads: 0,
+        impressions: 0,
+        reach: 0,
+        followersGained: 0,
+        followersLost: 0,
       };
       current.spend += day.spend;
       current.clicks += day.clicks;
       current.likes += day.likes;
+      current.comments += day.comments;
+      current.shares += day.shares;
       current.leads += day.leads;
+      current.impressions += day.impressions;
+      current.reach += day.reach;
+      current.followersGained += day.followersGained;
+      current.followersLost += day.followersLost;
       byDate.set(day.date, current);
     });
   });
 
-  return Array.from(byDate.values())
-    .sort((a, b) => a.date.localeCompare(b.date))
-    .slice(-14);
+  const days = Array.from(byDate.values()).sort((a, b) => a.date.localeCompare(b.date));
+  return limit ? days.slice(-limit) : days;
 }
 
 function renderCampaignOptions(report) {
@@ -599,6 +633,38 @@ function renderCampaigns(report) {
     .join("");
 }
 
+function renderEngagement(totals, report) {
+  const days = aggregateDaily(report, 0);
+  const averageEngagement =
+    days.length > 0 ? totals.engagement / days.length : 0;
+  const averageRate =
+    days.length > 0
+      ? days.reduce((sum, day) => {
+          const interactions = day.likes + day.comments + day.shares;
+          return sum + (day.reach > 0 ? (interactions / day.reach) * 100 : 0);
+        }, 0) / days.length
+      : 0;
+
+  const cards = [
+    ["Engagement rate", `${formatDecimal(totals.engagementRate)}%`, "Interazioni / persone raggiunte"],
+    ["Interazioni totali", formatNumber(totals.engagement), "Like, commenti e condivisioni"],
+    ["Media giornaliera", formatNumber(averageEngagement), "Interazioni medie nel periodo"],
+    ["ER medio giorno", `${formatDecimal(averageRate)}%`, "Media dei giorni selezionati"],
+  ];
+
+  engagementGrid.innerHTML = cards
+    .map(
+      ([label, value, note]) => `
+        <article class="engagement-card">
+          <span>${escapeHtml(label)}</span>
+          <strong>${escapeHtml(value)}</strong>
+          <small>${escapeHtml(note)}</small>
+        </article>
+      `
+    )
+    .join("");
+}
+
 function renderChart(report) {
   const days = aggregateDaily(report);
   const max = Math.max(...days.map((day) => day[activeChartMetric]), 1);
@@ -613,6 +679,41 @@ function renderChart(report) {
       return `
         <div class="bar" title="${escapeHtml(String(value))}">
           <div class="bar-fill" style="height: ${height}%"></div>
+          <small>${label}</small>
+        </div>
+      `;
+    })
+    .join("");
+}
+
+function renderFollowerChart(report) {
+  const days = aggregateDaily(report, 31);
+  const max = Math.max(
+    ...days.map((day) => Math.max(day.followersGained, day.followersLost)),
+    1
+  );
+
+  followerChart.style.setProperty("--follower-columns", days.length || 1);
+  followerChart.innerHTML = days
+    .map((day) => {
+      const gainedHeight = Math.max(4, (day.followersGained / max) * 100);
+      const lostHeight = Math.max(4, (day.followersLost / max) * 100);
+      const net = day.followersGained - day.followersLost;
+      const date = new Date(`${day.date}T00:00:00`);
+      const label = new Intl.DateTimeFormat("it-IT", {
+        day: "2-digit",
+        month: "2-digit",
+      }).format(date);
+
+      return `
+        <div class="follower-day" title="+${formatNumber(day.followersGained)} / -${formatNumber(day.followersLost)} follower">
+          <span class="follower-value is-gain">+${formatNumber(day.followersGained)}</span>
+          <div class="follower-bars">
+            <div class="follower-bar is-gain" style="height: ${gainedHeight}%"></div>
+            <div class="follower-baseline"></div>
+            <div class="follower-bar is-loss" style="height: ${lostHeight}%"></div>
+          </div>
+          <span class="follower-value is-net">${net >= 0 ? "+" : ""}${formatNumber(net)}</span>
           <small>${label}</small>
         </div>
       `;
@@ -638,8 +739,10 @@ function renderDashboard(mode = "demo", detail = "") {
 
   renderStatus(mode, detail);
   renderMetrics(totals);
+  renderEngagement(totals, currentReport);
   renderCampaigns(currentReport);
   renderChart(currentReport);
+  renderFollowerChart(currentReport);
 }
 
 function randomInt(min, max) {
@@ -711,6 +814,20 @@ function buildRandomDailySeries(campaign, range) {
     const comments = Math.max(0, Math.round(likes * seededFloat(`${seed}-comments`, 0.04, 0.16)));
     const shares = Math.max(0, Math.round(likes * seededFloat(`${seed}-shares`, 0.03, 0.13)));
     const leads = Math.max(0, Math.round(clicks * seededFloat(`${seed}-leads`, 0.035, 0.105)));
+    const followersGained = Math.max(
+      1,
+      Math.round(
+        leads * seededFloat(`${seed}-followers-leads`, 0.25, 0.62) +
+          likes * seededFloat(`${seed}-followers-likes`, 0.018, 0.07)
+      )
+    );
+    const followersLost = Math.max(
+      0,
+      Math.round(
+        followersGained * seededFloat(`${seed}-followers-lost`, 0.12, 0.48) +
+          clicks * seededFloat(`${seed}-followers-clicks`, 0.001, 0.009)
+      )
+    );
     const purchases =
       campaign.purchases > 0
         ? Math.max(0, Math.round(leads * seededFloat(`${seed}-purchases`, 0.08, 0.28)))
@@ -729,6 +846,8 @@ function buildRandomDailySeries(campaign, range) {
       likes,
       comments,
       shares,
+      followersGained,
+      followersLost,
       leads,
       purchases,
       revenue,
@@ -747,6 +866,8 @@ function summarizeRandomCampaign(campaign, range) {
       acc.likes += day.likes;
       acc.comments += day.comments;
       acc.shares += day.shares;
+      acc.followersGained += day.followersGained;
+      acc.followersLost += day.followersLost;
       acc.leads += day.leads;
       acc.purchases += day.purchases;
       acc.revenue += day.revenue;
@@ -760,6 +881,8 @@ function summarizeRandomCampaign(campaign, range) {
       likes: 0,
       comments: 0,
       shares: 0,
+      followersGained: 0,
+      followersLost: 0,
       leads: 0,
       purchases: 0,
       revenue: 0,
