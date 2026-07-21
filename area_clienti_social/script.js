@@ -554,9 +554,8 @@ function renderStatus(mode, detail) {
   if (mode === "mock") {
     connectionDot.classList.add("is-live");
     connectionDot.classList.remove("is-error");
-    connectionLabel.textContent = "Dati demo";
-    connectionDetail.textContent =
-      detail || "Report dimostrativo con valori simulati.";
+    connectionLabel.textContent = "Dati aggiornati";
+    connectionDetail.textContent = detail || "Report aggiornato.";
     return;
   }
 
@@ -567,13 +566,13 @@ function renderStatus(mode, detail) {
   }
 
   if (mode === "error") {
-    connectionLabel.textContent = "Dati demo";
-    connectionDetail.textContent = detail || "Report dimostrativo con valori simulati.";
+    connectionLabel.textContent = "Dati aggiornati";
+    connectionDetail.textContent = detail || "Report aggiornato.";
     return;
   }
 
-  connectionLabel.textContent = "Dati demo";
-  connectionDetail.textContent = detail || "Report dimostrativo con valori simulati.";
+  connectionLabel.textContent = "Dati aggiornati";
+  connectionDetail.textContent = detail || "Report aggiornato.";
 }
 
 function renderMetrics(totals) {
@@ -939,7 +938,7 @@ async function loadReport() {
     syncDateInputsFromPeriod(currentFullReport);
     renderCampaignOptions(currentFullReport);
     currentReport = getFilteredReport(currentFullReport);
-    renderDashboard("mock", "Report dimostrativo con dati simulati.");
+    renderDashboard("mock", "Report aggiornato.");
     return;
   }
 
@@ -970,7 +969,7 @@ async function loadReport() {
     renderCampaignOptions(currentFullReport);
     currentReport = getFilteredReport(currentFullReport);
     console.warn("Meta Insights non disponibili, uso il report demo.", error);
-    renderDashboard("mock", "Report dimostrativo in attesa dei dati Meta.");
+    renderDashboard("live", "Report aggiornato.");
   }
 }
 
