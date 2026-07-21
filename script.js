@@ -24,7 +24,7 @@ const followerChart = document.querySelector("#followerChart");
 const chartButtons = Array.from(document.querySelectorAll("[data-chart-metric]"));
 const exportCsv = document.querySelector("#exportCsv");
 
-const useMockMetaApi = true;
+const useMockMetaApi = false;
 const mockDateRange = {
   from: "2026-04-01",
   to: "2026-06-30",
@@ -36,7 +36,7 @@ const clients = [
     name: "Salottidea",
     description:
       "Andamento delle campagne social nel periodo selezionato.",
-    metaAccount: "act_123456789",
+    metaAccount: "act_8122658294482022",
     endpoint: "/api/meta-insights",
   },
 ];
@@ -944,7 +944,10 @@ async function loadReport() {
   }
 
   try {
-    const response = await fetch(endpoint, { headers: { Accept: "application/json" } });
+    const response = await fetch(endpoint, {
+      credentials: "same-origin",
+      headers: { Accept: "application/json" },
+    });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const payload = await response.json();
     currentFullReport = normalizeReport(payload, fallback);
@@ -953,11 +956,12 @@ async function loadReport() {
     currentReport = getFilteredReport(currentFullReport);
     renderDashboard("live", "Report aggiornato.");
   } catch (error) {
-    currentFullReport = normalizeReport(fallback, fallback);
+    const fallbackPayload = buildRandomMockReport(currentClient.id, range);
+    currentFullReport = normalizeReport(fallbackPayload, fallback);
     syncDateInputsFromPeriod(currentFullReport);
     renderCampaignOptions(currentFullReport);
     currentReport = getFilteredReport(currentFullReport);
-    renderDashboard("error", "Report dimostrativo con dati simulati.");
+    renderDashboard("error", "Meta non disponibile: visualizzo dati demo.");
   }
 }
 
