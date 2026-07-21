@@ -948,8 +948,16 @@ async function loadReport() {
       credentials: "same-origin",
       headers: { Accept: "application/json" },
     });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const payload = await response.json();
+
+    if (!response.ok) {
+      throw new Error(payload.message || `Meta API HTTP ${response.status}`);
+    }
+
+    if (!Array.isArray(payload.campaigns) || payload.campaigns.length === 0) {
+      throw new Error("Meta ha risposto, ma non ci sono campagne nel periodo selezionato.");
+    }
+
     currentFullReport = normalizeReport(payload, fallback);
     syncDateInputsFromPeriod(currentFullReport);
     renderCampaignOptions(currentFullReport);
@@ -961,7 +969,7 @@ async function loadReport() {
     syncDateInputsFromPeriod(currentFullReport);
     renderCampaignOptions(currentFullReport);
     currentReport = getFilteredReport(currentFullReport);
-    renderDashboard("error", "Meta non disponibile: visualizzo dati demo.");
+    renderDashboard("error", `${error.message} Visualizzo dati demo.`);
   }
 }
 
