@@ -124,7 +124,7 @@ async function fetchMetaJson(url) {
   return payload;
 }
 
-module.exports = async function handler(request, response) {
+export default async function handler(request, response) {
   const token = process.env.META_ACCESS_TOKEN;
   const adAccountId = cleanAdAccountId(process.env.META_AD_ACCOUNT_ID);
   const apiVersion = process.env.META_API_VERSION || DEFAULT_API_VERSION;
@@ -187,4 +187,4 @@ module.exports = async function handler(request, response) {
       campaigns: [],
     });
   }
-};
+}
