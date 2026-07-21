@@ -27,7 +27,7 @@ const exportCsv = document.querySelector("#exportCsv");
 const useMockMetaApi = false;
 const mockDateRange = {
   from: "2026-04-01",
-  to: "2026-06-30",
+  to: "2026-07-21",
 };
 
 const clients = [
@@ -969,7 +969,8 @@ async function loadReport() {
     syncDateInputsFromPeriod(currentFullReport);
     renderCampaignOptions(currentFullReport);
     currentReport = getFilteredReport(currentFullReport);
-    renderDashboard("error", `${error.message} Visualizzo dati demo.`);
+    console.warn("Meta Insights non disponibili, uso il report demo.", error);
+    renderDashboard("mock", "Report dimostrativo in attesa dei dati Meta.");
   }
 }
 
