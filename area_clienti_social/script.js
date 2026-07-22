@@ -27,7 +27,34 @@ const exportCsv = document.querySelector("#exportCsv");
 const useMockMetaApi = false;
 const mockDateRange = {
   from: "2026-04-01",
-  to: "2026-07-21",
+  to: "2026-07-22",
+};
+
+const monthNames = {
+  gennaio: 1,
+  gen: 1,
+  febbraio: 2,
+  feb: 2,
+  marzo: 3,
+  mar: 3,
+  aprile: 4,
+  apr: 4,
+  maggio: 5,
+  mag: 5,
+  giugno: 6,
+  giu: 6,
+  luglio: 7,
+  lug: 7,
+  agosto: 8,
+  ago: 8,
+  settembre: 9,
+  set: 9,
+  ottobre: 10,
+  ott: 10,
+  novembre: 11,
+  nov: 11,
+  dicembre: 12,
+  dic: 12,
 };
 
 const clients = [
@@ -333,6 +360,45 @@ function addDays(value, amount) {
   return isoDate(date);
 }
 
+function normalizeYear(value) {
+  const year = Number(value);
+  if (!Number.isFinite(year)) return null;
+  return year < 100 ? 2000 + year : year;
+}
+
+function getMonthEnd(year, month) {
+  const day = new Date(year, month, 0).getDate();
+  return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+}
+
+function getCampaignMonthRange(campaign) {
+  const name = (campaign?.name || "").toLowerCase();
+  const monthPattern =
+    /(gennaio|febbraio|marzo|aprile|maggio|giugno|luglio|agosto|settembre|ottobre|novembre|dicembre|gen|feb|mar|apr|mag|giu|lug|ago|set|ott|nov|dic)\s*[-_/ ]*\s*(\d{2,4})?/g;
+  const matches = [];
+  let match = monthPattern.exec(name);
+
+  while (match) {
+    matches.push({
+      month: monthNames[match[1]],
+      year: match[2] ? normalizeYear(match[2]) : null,
+    });
+    match = monthPattern.exec(name);
+  }
+
+  if (matches.length === 0) return null;
+  const year = [...matches].reverse().find((item) => item.year)?.year;
+  if (!year) return null;
+
+  const firstMonth = matches[0].month;
+  const lastMonth = matches[matches.length - 1].month;
+
+  return {
+    from: `${year}-${String(firstMonth).padStart(2, "0")}-01`,
+    to: getMonthEnd(year, lastMonth),
+  };
+}
+
 function getQuickRange(report, period) {
   const bounds = getDateBounds(report);
   const max = report?.date_stop || bounds.max || mockDateRange.to || isoDate(new Date());
@@ -436,13 +502,25 @@ function getFilteredReport(report) {
   };
 }
 
+function normalizeCampaignOption(campaign) {
+  return {
+    id: campaign.id,
+    name: campaign.name || "Campagna senza nome",
+    status: campaign.effective_status || campaign.status || "ACTIVE",
+    objective: campaign.objective || "-",
+  };
+}
+
 function normalizeReport(payload, fallback) {
   const sourceCampaigns = payload?.campaigns || payload?.data || fallback.campaigns;
+  const sourceAvailableCampaigns =
+    payload?.availableCampaigns || payload?.campaigns || payload?.data || fallback.campaigns;
 
   return {
     updatedAt: payload?.updatedAt || payload?.updated_time || new Date().toISOString(),
     date_start: payload?.date_start || fallback?.date_start || mockDateRange.from,
     date_stop: payload?.date_stop || fallback?.date_stop || mockDateRange.to,
+    availableCampaigns: sourceAvailableCampaigns.map(normalizeCampaignOption),
     campaigns: sourceCampaigns.map(normalizeCampaign),
   };
 }
@@ -528,7 +606,8 @@ function aggregateDaily(report, limit = 14) {
 }
 
 function renderCampaignOptions(report) {
-  const activeCampaignsList = report.campaigns.filter((campaign) => campaign.status === "ACTIVE");
+  const campaignOptions = report.availableCampaigns || report.campaigns;
+  const activeCampaignsList = campaignOptions.filter((campaign) => campaign.status === "ACTIVE");
   const hasSelectedCampaign = activeCampaignsList.some(
     (campaign) => campaign.id === selectedCampaignId
   );
@@ -948,12 +1027,15 @@ async function loadReport() {
       headers: { Accept: "application/json" },
     });
     const payload = await response.json();
+    const hasCampaignData = Array.isArray(payload.campaigns) && payload.campaigns.length > 0;
+    const hasCampaignOptions =
+      Array.isArray(payload.availableCampaigns) && payload.availableCampaigns.length > 0;
 
     if (!response.ok) {
       throw new Error(payload.message || `Meta API HTTP ${response.status}`);
     }
 
-    if (!Array.isArray(payload.campaigns) || payload.campaigns.length === 0) {
+    if (!hasCampaignData && !hasCampaignOptions) {
       throw new Error("Meta ha risposto, ma non ci sono campagne nel periodo selezionato.");
     }
 
@@ -1046,6 +1128,19 @@ initializeReport();
 
 campaignSelect.addEventListener("change", () => {
   selectedCampaignId = campaignSelect.value;
+  const selectedCampaign = (currentFullReport.availableCampaigns || currentFullReport.campaigns).find(
+    (campaign) => campaign.id === selectedCampaignId
+  );
+  const campaignRange = getCampaignMonthRange(selectedCampaign);
+
+  if (campaignRange) {
+    periodSelect.value = "custom";
+    dateFrom.value = campaignRange.from;
+    dateTo.value = campaignRange.to;
+    loadReport();
+    return;
+  }
+
   currentReport = getFilteredReport(currentFullReport);
   renderDashboard(currentConnectionMode);
 });
