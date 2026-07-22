@@ -173,6 +173,13 @@ export default async function handler(request, response) {
       date_start: from,
       date_stop: to,
       updatedAt: new Date().toISOString(),
+      availableCampaigns: (campaignPayload.data || []).map((campaign) => ({
+        id: campaign.id,
+        name: campaign.name,
+        status: campaign.status || campaign.effective_status || "ACTIVE",
+        effective_status: campaign.effective_status || campaign.status || "ACTIVE",
+        objective: campaign.objective || "-",
+      })),
       campaigns: Array.from(campaigns.values()).map((campaign) => ({
         ...campaign,
         spend: Number(campaign.spend.toFixed(2)),
