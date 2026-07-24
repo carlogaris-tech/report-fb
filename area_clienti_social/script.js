@@ -409,6 +409,20 @@ function getCampaignMonthRange(campaign) {
   });
 }
 
+function getCampaignSortValue(campaign) {
+  const range = getCampaignMonthRange(campaign);
+  if (!range?.from) return 0;
+  return Number(range.from.replaceAll("-", ""));
+}
+
+function sortCampaignOptions(campaigns) {
+  campaigns.sort((a, b) => {
+    const dateDifference = getCampaignSortValue(b) - getCampaignSortValue(a);
+    if (dateDifference !== 0) return dateDifference;
+    return a.name.localeCompare(b.name, "it");
+  });
+}
+
 function getQuickRange(report, period) {
   const bounds = getDateBounds(report);
   const max = report?.date_stop || bounds.max || mockDateRange.to || isoDate(new Date());
@@ -538,7 +552,7 @@ function rememberCampaignOptions(campaigns = []) {
     };
   });
 
-  campaignOptionsCache.sort((a, b) => a.name.localeCompare(b.name, "it"));
+  sortCampaignOptions(campaignOptionsCache);
 }
 
 function normalizeReport(payload, fallback) {
@@ -794,13 +808,16 @@ function renderChart(report) {
   barChart.innerHTML = days
     .map((day) => {
       const value = day[activeChartMetric];
+      const formattedValue =
+        activeChartMetric === "spend" ? formatCurrency(value) : formatNumber(value);
       const height = Math.max(4, (value / max) * 100);
       const date = new Date(`${day.date}T00:00:00`);
       const label = new Intl.DateTimeFormat("it-IT", { day: "2-digit", month: "2-digit" }).format(date);
 
       return `
-        <div class="bar" title="${escapeHtml(String(value))}">
+        <div class="bar" title="${escapeHtml(`${label} - ${formattedValue}`)}">
           <div class="bar-fill" style="height: ${height}%"></div>
+          <span class="bar-value">${escapeHtml(formattedValue)}</span>
           <small>${label}</small>
         </div>
       `;
