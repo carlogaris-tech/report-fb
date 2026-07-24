@@ -745,6 +745,16 @@ progress::-moz-progress-bar {
   text-align: center;
 }
 
+.bar-value {
+  display: block;
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 850;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+}
+
 .follower-chart {
   --follower-columns: 14;
   min-height: 330px;
