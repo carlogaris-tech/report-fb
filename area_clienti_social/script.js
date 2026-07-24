@@ -172,6 +172,7 @@ let activeChartMetric = "spend";
 let currentConnectionMode = "mock";
 let selectedCampaignId = "all";
 let isManualRange = false;
+let campaignOptionsCache = [];
 
 function escapeHtml(text) {
   const div = document.createElement("div");
@@ -520,10 +521,42 @@ function normalizeCampaignOption(campaign) {
   };
 }
 
+function rememberCampaignOptions(campaigns = []) {
+  campaigns.forEach((campaign) => {
+    if (!campaign?.id) return;
+    const option = normalizeCampaignOption(campaign);
+    const existingIndex = campaignOptionsCache.findIndex((item) => item.id === option.id);
+
+    if (existingIndex === -1) {
+      campaignOptionsCache.push(option);
+      return;
+    }
+
+    campaignOptionsCache[existingIndex] = {
+      ...campaignOptionsCache[existingIndex],
+      ...option,
+    };
+  });
+
+  campaignOptionsCache.sort((a, b) => a.name.localeCompare(b.name, "it"));
+}
+
 function normalizeReport(payload, fallback) {
   const sourceCampaigns = payload?.campaigns || payload?.data || fallback.campaigns;
+  const payloadAvailableCampaigns =
+    Array.isArray(payload?.availableCampaigns) && payload.availableCampaigns.length > 0
+      ? payload.availableCampaigns
+      : [];
+
+  rememberCampaignOptions(payloadAvailableCampaigns);
+  rememberCampaignOptions(sourceCampaigns);
+
   const sourceAvailableCampaigns =
-    payload?.availableCampaigns || payload?.campaigns || payload?.data || fallback.campaigns;
+    campaignOptionsCache.length > 0
+      ? campaignOptionsCache
+      : payloadAvailableCampaigns.length > 0
+        ? payloadAvailableCampaigns
+        : sourceCampaigns;
 
   return {
     updatedAt: payload?.updatedAt || payload?.updated_time || new Date().toISOString(),
@@ -615,7 +648,8 @@ function aggregateDaily(report, limit = 14) {
 }
 
 function renderCampaignOptions(report) {
-  const campaignOptions = report.availableCampaigns || report.campaigns;
+  const campaignOptions =
+    campaignOptionsCache.length > 0 ? campaignOptionsCache : report.availableCampaigns || report.campaigns;
   const activeCampaignsList = campaignOptions.filter((campaign) => campaign.status === "ACTIVE");
   const hasSelectedCampaign = activeCampaignsList.some(
     (campaign) => campaign.id === selectedCampaignId
