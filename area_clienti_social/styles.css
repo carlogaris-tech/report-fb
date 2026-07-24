@@ -276,13 +276,23 @@ label {
 
 input,
 select {
+  color-scheme: dark;
   min-height: 44px;
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 9px 12px;
   color: var(--ink);
-  background: rgba(255, 255, 255, 0.06);
+  background: #16243a;
   outline: none;
+}
+
+select {
+  appearance: auto;
+}
+
+select option {
+  color: var(--ink);
+  background: #101b2c;
 }
 
 input:focus,
