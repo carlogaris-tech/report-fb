@@ -645,8 +645,9 @@ function renderStatus(mode, detail) {
   }
 
   if (mode === "error") {
-    connectionLabel.textContent = "Dati aggiornati";
-    connectionDetail.textContent = detail || "Report aggiornato.";
+    connectionLabel.textContent = "Dati non aggiornati";
+    connectionDetail.textContent =
+      detail || "Meta non ha restituito dati aggiornati.";
     return;
   }
 
@@ -990,6 +991,18 @@ function buildRandomMockReport(clientId, range) {
   };
 }
 
+function buildUnavailableReport(clientId, range) {
+  return {
+    clientId,
+    mode: "error",
+    date_start: range.from,
+    date_stop: range.to,
+    updatedAt: new Date().toISOString(),
+    availableCampaigns: [],
+    campaigns: [],
+  };
+}
+
 function mockMetaInsightsRequest(clientId, range) {
   return new Promise((resolve) => {
     window.setTimeout(() => {
@@ -1045,13 +1058,13 @@ async function loadReport() {
     currentReport = getFilteredReport(currentFullReport);
     renderDashboard("live", "Report aggiornato.");
   } catch (error) {
-    const fallbackPayload = buildRandomMockReport(currentClient.id, range);
-    currentFullReport = normalizeReport(fallbackPayload, fallback);
+    const unavailablePayload = buildUnavailableReport(currentClient.id, range);
+    currentFullReport = normalizeReport(unavailablePayload, fallback);
     syncDateInputsFromPeriod(currentFullReport);
     renderCampaignOptions(currentFullReport);
     currentReport = getFilteredReport(currentFullReport);
-    console.warn("Meta Insights non disponibili, uso il report demo.", error);
-    renderDashboard("live", "Report aggiornato.");
+    console.warn("Meta Insights non disponibili.", error);
+    renderDashboard("error", "Dati momentaneamente non disponibili.");
   }
 }
 
