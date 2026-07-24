@@ -171,6 +171,7 @@ let currentReport = fallbackReports[currentClient.id];
 let activeChartMetric = "spend";
 let currentConnectionMode = "mock";
 let selectedCampaignId = "all";
+let isManualRange = false;
 
 function escapeHtml(text) {
   const div = document.createElement("div");
@@ -371,6 +372,14 @@ function getMonthEnd(year, month) {
   return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
 }
 
+function capRangeToToday(range) {
+  const today = isoDate(new Date());
+  return {
+    from: range.from,
+    to: range.to > today ? today : range.to,
+  };
+}
+
 function getCampaignMonthRange(campaign) {
   const name = (campaign?.name || "").toLowerCase();
   const monthPattern =
@@ -393,10 +402,10 @@ function getCampaignMonthRange(campaign) {
   const firstMonth = matches[0].month;
   const lastMonth = matches[matches.length - 1].month;
 
-  return {
+  return capRangeToToday({
     from: `${year}-${String(firstMonth).padStart(2, "0")}-01`,
     to: getMonthEnd(year, lastMonth),
-  };
+  });
 }
 
 function getQuickRange(report, period) {
@@ -428,7 +437,7 @@ function getQuickRange(report, period) {
 }
 
 function syncDateInputsFromPeriod(report) {
-  if (periodSelect.value === "custom") return;
+  if (isManualRange) return;
   const range = getQuickRange(report, periodSelect.value);
   dateFrom.value = range.from;
   dateTo.value = range.to;
@@ -991,14 +1000,19 @@ function buildRandomMockReport(clientId, range) {
   };
 }
 
-function buildUnavailableReport(clientId, range) {
+function buildUnavailableReport(clientId, range, previousReport = null) {
+  const previousCampaigns =
+    previousReport?.availableCampaigns?.length > 0
+      ? previousReport.availableCampaigns
+      : previousReport?.campaigns || [];
+
   return {
     clientId,
     mode: "error",
     date_start: range.from,
     date_stop: range.to,
     updatedAt: new Date().toISOString(),
-    availableCampaigns: [],
+    availableCampaigns: previousCampaigns,
     campaigns: [],
   };
 }
@@ -1014,13 +1028,13 @@ function mockMetaInsightsRequest(clientId, range) {
 async function loadReport() {
   const fallback = fallbackReports[currentClient.id];
   const range = getEndpointRange();
-  if (periodSelect.value !== "custom") {
+  if (!isManualRange) {
     dateFrom.value = range.from;
     dateTo.value = range.to;
   }
   const endpoint = `${currentClient.endpoint}?client=${encodeURIComponent(
     currentClient.id
-  )}&period=${encodeURIComponent(periodSelect.value)}&date_start=${encodeURIComponent(
+  )}&period=${encodeURIComponent(isManualRange ? "custom" : periodSelect.value)}&date_start=${encodeURIComponent(
     range.from
   )}&date_stop=${encodeURIComponent(range.to)}`;
 
@@ -1058,7 +1072,7 @@ async function loadReport() {
     currentReport = getFilteredReport(currentFullReport);
     renderDashboard("live", "Report aggiornato.");
   } catch (error) {
-    const unavailablePayload = buildUnavailableReport(currentClient.id, range);
+    const unavailablePayload = buildUnavailableReport(currentClient.id, range, currentFullReport);
     currentFullReport = normalizeReport(unavailablePayload, fallback);
     syncDateInputsFromPeriod(currentFullReport);
     renderCampaignOptions(currentFullReport);
@@ -1083,7 +1097,7 @@ function getEndpointRange() {
   const fallback = fallbackReports[currentClient.id];
   const referenceReport = currentFullReport || normalizeReport(fallback, fallback);
 
-  if (periodSelect.value !== "custom") {
+  if (!isManualRange) {
     return getQuickRange(referenceReport, periodSelect.value);
   }
 
@@ -1132,7 +1146,8 @@ function exportCurrentCsv() {
   const link = document.createElement("a");
   link.href = url;
   const campaignSlug = selectedCampaignId === "all" ? "tutte-campagne" : selectedCampaignId;
-  link.download = `report-social-${currentClient.id}-${campaignSlug}-${periodSelect.value}.csv`;
+  const periodSlug = isManualRange ? "periodo-personalizzato" : periodSelect.value;
+  link.download = `report-social-${currentClient.id}-${campaignSlug}-${periodSlug}.csv`;
   link.click();
   URL.revokeObjectURL(url);
 }
@@ -1147,7 +1162,7 @@ campaignSelect.addEventListener("change", () => {
   const campaignRange = getCampaignMonthRange(selectedCampaign);
 
   if (campaignRange) {
-    periodSelect.value = "custom";
+    isManualRange = true;
     dateFrom.value = campaignRange.from;
     dateTo.value = campaignRange.to;
     loadReport();
@@ -1157,10 +1172,13 @@ campaignSelect.addEventListener("change", () => {
   currentReport = getFilteredReport(currentFullReport);
   renderDashboard(currentConnectionMode);
 });
-periodSelect.addEventListener("change", loadReport);
+periodSelect.addEventListener("change", () => {
+  isManualRange = false;
+  loadReport();
+});
 refreshData.addEventListener("click", loadReport);
 applyDateFilter.addEventListener("click", () => {
-  periodSelect.value = "custom";
+  isManualRange = true;
   loadReport();
 });
 exportCsv.addEventListener("click", exportCurrentCsv);
