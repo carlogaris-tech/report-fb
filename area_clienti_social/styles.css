@@ -702,7 +702,7 @@ progress::-moz-progress-bar {
 
 .chart-tabs {
   display: inline-grid;
-  grid-template-columns: repeat(4, max-content);
+  grid-template-columns: repeat(5, max-content);
   gap: 6px;
   margin-bottom: 18px;
   padding: 5px;
