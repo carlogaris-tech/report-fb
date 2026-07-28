@@ -34,7 +34,7 @@ function parseActions(actions = [], actionValues = []) {
       totals.likes += value;
     }
 
-    if (type === "comment") {
+    if (type.includes("comment")) {
       totals.comments += value;
     }
 
