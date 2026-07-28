@@ -721,13 +721,12 @@ function renderMetrics(totals) {
     ["Like", formatNumber(totals.likes), `${formatNumber(totals.engagement)} interazioni totali`],
     ["Commenti", formatNumber(totals.comments), `${formatNumber(totals.shares)} condivisioni`],
     ["CPC medio", formatCurrency(totals.cpc), "Costo medio per click"],
-    ["Lead", formatNumber(totals.leads), `CPL ${formatCurrency(totals.cpl)}`],
-    ["Acquisti", formatNumber(totals.purchases), `${formatCurrency(totals.revenue)} valore tracciato`],
+    ["Visualizzazioni contenuti sul sito web", formatNumber(totals.leads), `Costo medio ${formatCurrency(totals.cpl)}`],
     ["ROAS", `${formatDecimal(totals.roas, 1)}x`, "Ricavi / spesa adv"],
     [
       "Conversion rate",
       `${formatDecimal(totals.clicks > 0 ? (totals.leads / totals.clicks) * 100 : 0)}%`,
-      "Lead generati sui click",
+      "Visualizzazioni contenuti sui click",
     ],
   ];
 
@@ -1166,12 +1165,10 @@ function exportCurrentCsv() {
       "impression",
       "copertura",
       "click",
-      "like",
+      "interazioni con la pagina",
       "commenti",
       "condivisioni",
-      "lead",
-      "acquisti",
-      "ricavi",
+      "visualizzazioni contenuti sul sito web",
     ],
     ...currentReport.campaigns.map((campaign) => [
       campaign.name,
@@ -1185,8 +1182,6 @@ function exportCurrentCsv() {
       campaign.comments,
       campaign.shares,
       campaign.leads,
-      campaign.purchases,
-      campaign.revenue,
     ]),
   ];
 
