@@ -715,7 +715,8 @@ function renderStatus(mode, detail) {
 function renderMetrics(totals) {
   const cards = [
     ["Spesa", formatCurrency(totals.spend), "Budget investito nel periodo"],
-    ["Impression", formatNumber(totals.impressions), `${formatNumber(totals.reach)} persone raggiunte`],
+    ["Impression", formatNumber(totals.impressions), "Visualizzazioni generate"],
+    ["Copertura", formatNumber(totals.reach), "Persone raggiunte nel periodo"],
     ["Click", formatNumber(totals.clicks), `CTR ${formatDecimal(totals.ctr)}%`],
     ["Like", formatNumber(totals.likes), `${formatNumber(totals.engagement)} interazioni totali`],
     ["Commenti", formatNumber(totals.comments), `${formatNumber(totals.shares)} condivisioni`],
@@ -1163,7 +1164,7 @@ function exportCurrentCsv() {
       "stato",
       "spesa",
       "impression",
-      "reach",
+      "copertura",
       "click",
       "like",
       "commenti",
