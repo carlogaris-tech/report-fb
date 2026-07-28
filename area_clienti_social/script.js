@@ -233,6 +233,10 @@ function initials(name) {
     .toUpperCase();
 }
 
+function hasMetric(item, keys) {
+  return keys.some((key) => item?.[key] !== undefined && item?.[key] !== null && item?.[key] !== "");
+}
+
 function normalizeDaily(item) {
   if (Array.isArray(item)) {
     return {
@@ -249,6 +253,15 @@ function normalizeDaily(item) {
       revenue: Number(item[10]) || 0,
       followersGained: Number(item[11]) || 0,
       followersLost: Number(item[12]) || 0,
+      _hasImpressions: item.length > 4,
+      _hasReach: item.length > 5,
+      _hasLikes: item.length > 6,
+      _hasComments: item.length > 7,
+      _hasShares: item.length > 8,
+      _hasPurchases: item.length > 9,
+      _hasRevenue: item.length > 10,
+      _hasFollowersGained: item.length > 11,
+      _hasFollowersLost: item.length > 12,
     };
   }
 
@@ -266,6 +279,15 @@ function normalizeDaily(item) {
     revenue: Number(item.revenue || item.purchase_value) || 0,
     followersGained: Number(item.followersGained || item.followers_gained || item.follows) || 0,
     followersLost: Number(item.followersLost || item.followers_lost || item.unfollows) || 0,
+    _hasImpressions: hasMetric(item, ["impressions"]),
+    _hasReach: hasMetric(item, ["reach"]),
+    _hasLikes: hasMetric(item, ["likes", "post_reactions", "reactions"]),
+    _hasComments: hasMetric(item, ["comments"]),
+    _hasShares: hasMetric(item, ["shares"]),
+    _hasPurchases: hasMetric(item, ["purchases", "purchase"]),
+    _hasRevenue: hasMetric(item, ["revenue", "purchase_value"]),
+    _hasFollowersGained: hasMetric(item, ["followersGained", "followers_gained", "follows"]),
+    _hasFollowersLost: hasMetric(item, ["followersLost", "followers_lost", "unfollows"]),
   };
 }
 
@@ -278,13 +300,15 @@ function enrichDailyMetrics(campaign, daily) {
     const spendWeight = spendTotal > 0 ? day.spend / spendTotal : 0;
     const clickWeight = clickTotal > 0 ? day.clicks / clickTotal : spendWeight;
     const leadWeight = leadTotal > 0 ? day.leads / leadTotal : clickWeight;
-    const impressions = day.impressions || Math.round(campaign.impressions * clickWeight);
-    const reach = day.reach || Math.round(campaign.reach * clickWeight);
-    const likes = day.likes || Math.round(day.clicks * 0.32 + day.leads * 1.6);
-    const comments = day.comments || Math.round(day.leads * 0.42 + day.clicks * 0.015);
-    const shares = day.shares || Math.round(likes * 0.13);
-    const followersGained = day.followersGained || Math.round(day.leads * 0.32 + day.clicks * 0.018);
-    const followersLost = day.followersLost || Math.round(day.clicks * 0.006);
+    const impressions = day._hasImpressions ? day.impressions : Math.round(campaign.impressions * clickWeight);
+    const reach = day._hasReach ? day.reach : Math.round(campaign.reach * clickWeight);
+    const likes = day._hasLikes ? day.likes : Math.round(day.clicks * 0.32 + day.leads * 1.6);
+    const comments = day._hasComments ? day.comments : Math.round(day.leads * 0.42 + day.clicks * 0.015);
+    const shares = day._hasShares ? day.shares : Math.round(likes * 0.13);
+    const followersGained = day._hasFollowersGained
+      ? day.followersGained
+      : Math.round(day.leads * 0.32 + day.clicks * 0.018);
+    const followersLost = day._hasFollowersLost ? day.followersLost : Math.round(day.clicks * 0.006);
 
     return {
       ...day,
@@ -295,8 +319,8 @@ function enrichDailyMetrics(campaign, daily) {
       shares,
       followersGained,
       followersLost,
-      purchases: day.purchases || Math.round(campaign.purchases * leadWeight),
-      revenue: day.revenue || Number((campaign.revenue * leadWeight).toFixed(2)),
+      purchases: day._hasPurchases ? day.purchases : Math.round(campaign.purchases * leadWeight),
+      revenue: day._hasRevenue ? day.revenue : Number((campaign.revenue * leadWeight).toFixed(2)),
     };
   });
 }
