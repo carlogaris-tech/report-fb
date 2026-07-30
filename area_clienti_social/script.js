@@ -1,1239 +1,1550 @@
-:root {
-  color-scheme: dark;
-  --ink: #f7fbff;
-  --muted: #9daec4;
-  --soft: rgba(255, 255, 255, 0.07);
-  --line: rgba(255, 255, 255, 0.12);
-  --paper: #06101d;
-  --surface: #101b2c;
-  --surface-strong: #16243a;
-  --navy: #111a2f;
-  --blue: #72a7ff;
-  --blue-soft: rgba(114, 167, 255, 0.15);
-  --teal: #22d3c5;
-  --teal-bright: #5eead4;
-  --coral: #ff8a70;
-  --amber: #f8c55d;
-  --green: #b8ff4d;
-  --lime: #c8ff63;
-  --shadow: 0 18px 44px rgba(0, 0, 0, 0.22);
-  --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.16);
-}
-
-* {
-  box-sizing: border-box;
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  margin: 0;
-  min-height: 100vh;
-  font-family:
-    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
-    "Segoe UI", sans-serif;
-  color: var(--ink);
-  background:
-    radial-gradient(circle at 20% 0%, rgba(114, 167, 255, 0.14), transparent 32vw),
-    radial-gradient(circle at 92% 16%, rgba(200, 255, 99, 0.08), transparent 28vw),
-    linear-gradient(180deg, #07111f 0%, var(--paper) 360px);
-}
-
-button,
-input,
-select {
-  font: inherit;
-}
-
-button,
-a {
-  -webkit-tap-highlight-color: transparent;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-.app-shell {
-  min-height: 100vh;
-  display: grid;
-  grid-template-columns: 256px minmax(0, 1fr);
-}
-
-.sidebar {
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  gap: 28px;
-  padding: 26px 18px;
-  color: #f8fbfc;
-  background:
-    radial-gradient(circle at 30% 8%, rgba(24, 183, 168, 0.16), transparent 34%),
-    linear-gradient(180deg, #121b30, #07111f);
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.brand,
-.access-card {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.brand img {
-  width: 52px;
-  height: 52px;
-  object-fit: contain;
-  border-radius: 8px;
-  background: #fff;
-  padding: 4px;
-}
-
-.brand strong,
-.brand small,
-.access-card strong,
-.access-card small {
-  display: block;
-}
-
-.brand small,
-.access-card small {
-  margin-top: 3px;
-  color: rgba(248, 251, 252, 0.68);
-}
-
-.sidebar nav {
-  display: grid;
-  gap: 6px;
-}
-
-.sidebar nav a {
-  padding: 11px 12px;
-  border-radius: 8px;
-  color: rgba(248, 251, 252, 0.72);
-  border: 1px solid transparent;
-  font-weight: 750;
-}
-
-.sidebar nav a:hover,
-.sidebar nav a.is-active {
-  color: #fff;
-  border-color: rgba(71, 135, 255, 0.32);
-  background: linear-gradient(135deg, rgba(37, 99, 235, 0.24), rgba(24, 183, 168, 0.13));
-}
-
-.access-card {
-  margin-top: auto;
-  padding: 14px;
-  border: 1px solid rgba(24, 183, 168, 0.28);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.06);
-}
-
-.avatar {
-  width: 42px;
-  height: 42px;
-  display: inline-grid;
-  place-items: center;
-  border-radius: 999px;
-  color: #07111f;
-  background: linear-gradient(135deg, #8fd400, #18b7a8);
-  font-weight: 850;
-}
-
-.workspace {
-  width: min(1480px, 100%);
-  margin: 0 auto;
-  padding: 34px;
-  min-width: 0;
-}
-
-.topbar > *,
-.date-query-panel > *,
-.content-grid > *,
-.status-strip > *,
-.metric-grid > *,
-.engagement-grid > *,
-.integration-grid > *,
-.panel,
-.client-panel {
-  min-width: 0;
-}
-
-.topbar,
-.date-query-panel,
-.status-strip,
-.report-section,
-.content-grid,
-.metric-grid,
-.engagement-grid,
-.top-actions,
-.date-controls,
-.integration-grid {
-  display: grid;
-}
-
-.topbar {
-  grid-template-columns: 1fr;
-  align-items: stretch;
-  gap: 16px;
-  margin-bottom: 24px;
-  padding: 24px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background:
-    linear-gradient(135deg, rgba(114, 167, 255, 0.12), rgba(200, 255, 99, 0.04)),
-    rgba(16, 27, 44, 0.92);
-  box-shadow: var(--shadow);
-}
-
-.eyebrow {
-  margin: 0 0 7px;
-  color: var(--lime);
-  font-size: 0.76rem;
-  font-weight: 850;
-  letter-spacing: 0;
-  text-transform: uppercase;
-}
-
-h1,
-h2,
-h3 {
-  margin: 0;
-  letter-spacing: 0;
-}
-
-h1 {
-  max-width: none;
-  font-size: clamp(2rem, 2.8vw, 2.7rem);
-  line-height: 1.05;
-  white-space: nowrap;
-}
-
-h2 {
-  font-size: 1.34rem;
-  line-height: 1.18;
-}
-
-h3 {
-  font-size: 1rem;
-}
-
-.topbar p:not(.eyebrow),
-.date-query-panel p:not(.eyebrow),
-.integration-panel p {
-  margin: 12px 0 0;
-  color: var(--muted);
-  line-height: 1.55;
-}
-
-.top-actions {
-  grid-template-columns: minmax(170px, 0.7fr) minmax(280px, 1.2fr) minmax(180px, 0.8fr) max-content;
-  align-items: end;
-  gap: 10px;
-  padding: 14px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.04);
-}
-
-.fixed-client {
-  min-height: 44px;
-  display: grid;
-  align-content: center;
-  gap: 7px;
-  padding: 9px 12px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.06);
-}
-
-.fixed-client span {
-  color: var(--muted);
-  font-size: 0.78rem;
-  font-weight: 800;
-  line-height: 1;
-}
-
-.fixed-client strong {
-  color: var(--lime);
-  font-size: 1rem;
-  line-height: 1;
-}
-
-label {
-  display: grid;
-  gap: 7px;
-  color: #d7e5f7;
-  font-size: 0.88rem;
-  font-weight: 780;
-}
-
-input,
-select {
-  color-scheme: dark;
-  min-height: 44px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 9px 12px;
-  color: var(--ink);
-  background: #16243a;
-  outline: none;
-}
-
-select {
-  appearance: auto;
-}
-
-select option {
-  color: var(--ink);
-  background: #101b2c;
-}
-
-input:focus,
-select:focus {
-  border-color: rgba(200, 255, 99, 0.62);
-  box-shadow: 0 0 0 3px rgba(200, 255, 99, 0.13);
-}
-
-button {
-  min-height: 42px;
-  border: 0;
-  border-radius: 8px;
-  padding: 0 16px;
-  cursor: pointer;
-  font-weight: 800;
-}
-
-.primary-button {
-  color: #07111f;
-  background: linear-gradient(135deg, var(--lime), #7dd3fc);
-  box-shadow: 0 12px 28px rgba(200, 255, 99, 0.12);
-}
-
-.primary-button:hover {
-  background: linear-gradient(135deg, #dcff83, #9ae8ff);
-}
-
-.ghost-button {
-  color: var(--lime);
-  background: rgba(200, 255, 99, 0.08);
-  border: 1px solid rgba(200, 255, 99, 0.22);
-}
-
-.full-button {
-  width: 100%;
-  margin-top: 18px;
-}
-
-.date-query-panel {
-  grid-template-columns: minmax(0, 1fr) minmax(420px, auto);
-  align-items: end;
-  gap: 24px;
-  margin-bottom: 22px;
-  padding: 22px 24px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background:
-    linear-gradient(135deg, rgba(114, 167, 255, 0.09), rgba(200, 255, 99, 0.04)),
-    var(--surface);
-  box-shadow: var(--shadow-soft);
-}
-
-.date-controls {
-  grid-template-columns: minmax(145px, 1fr) minmax(145px, 1fr) max-content;
-  align-items: end;
-  gap: 10px;
-}
-
-.status-strip {
-  grid-template-columns: minmax(250px, 1.3fr) repeat(4, minmax(135px, 1fr));
-  gap: 10px;
-  margin-bottom: 24px;
-}
-
-.status-strip > div {
-  min-height: 82px;
-  display: grid;
-  align-content: center;
-  gap: 4px;
-  padding: 15px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--surface);
-  box-shadow: var(--shadow-soft);
-}
-
-.status-strip strong {
-  color: #ffffff;
-}
-
-.status-strip strong,
-.status-strip small {
-  display: block;
-}
-
-.status-strip small {
-  color: var(--muted);
-  line-height: 1.4;
-}
-
-.status-strip > div:first-child {
-  grid-template-columns: 14px minmax(0, 1fr);
-  align-items: center;
-  column-gap: 10px;
-}
-
-.status-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 999px;
-  background: var(--amber);
-  box-shadow: 0 0 0 5px rgba(209, 150, 21, 0.12);
-}
-
-.status-dot.is-live {
-  background: var(--green);
-  box-shadow: 0 0 0 5px rgba(184, 255, 77, 0.14);
-}
-
-.status-dot.is-error {
-  background: var(--coral);
-  box-shadow: 0 0 0 5px rgba(191, 75, 54, 0.14);
-}
-
-.panel,
-.client-panel {
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--surface);
-  box-shadow: var(--shadow);
-}
-
-.client-panel,
-.panel {
-  padding: 24px;
-}
-
-.panel-heading {
-  margin-bottom: 18px;
-}
-
-.panel-heading.split {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.metric-grid {
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.metric-card {
-  min-height: 138px;
-  display: grid;
-  align-content: space-between;
-  gap: 18px;
-  padding: 17px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.035));
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
-  transition:
-    transform 160ms ease,
-    border-color 160ms ease,
-    box-shadow 160ms ease;
-}
-
-.metric-card:hover {
-  border-color: rgba(200, 255, 99, 0.25);
-  transform: translateY(-1px);
-  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.18);
-}
-
-.metric-card:nth-child(1),
-.metric-card:nth-child(4),
-.metric-card:nth-child(7) {
-  border-top: 3px solid var(--blue);
-}
-
-.metric-card:nth-child(2),
-.metric-card:nth-child(5),
-.metric-card:nth-child(8) {
-  border-top: 3px solid var(--teal-bright);
-}
-
-.metric-card:nth-child(3),
-.metric-card:nth-child(6),
-.metric-card:nth-child(9),
-.metric-card:nth-child(10) {
-  border-top: 3px solid var(--green);
-}
-
-.metric-card span,
-.metric-card small {
-  display: block;
-}
-
-.metric-card span {
-  color: var(--muted);
-  font-size: 0.78rem;
-  font-weight: 800;
-  text-transform: uppercase;
-}
-
-.metric-card strong {
-  display: block;
-  margin-top: 8px;
-  font-size: clamp(1.55rem, 3vw, 2.3rem);
-  line-height: 1;
-  color: #ffffff;
-}
-
-.metric-card:nth-child(3) strong,
-.metric-card:nth-child(4) strong,
-.metric-card:nth-child(7) strong,
-.metric-card:nth-child(8) strong,
-.metric-card:nth-child(9) strong,
-.metric-card:nth-child(10) strong {
-  color: var(--lime);
-}
-
-.metric-card small {
-  color: #c9d8ea;
-  line-height: 1.4;
-  font-weight: 760;
-}
-
-.metric-card.is-warning small {
-  color: var(--coral);
-}
-
-.engagement-grid {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.engagement-card {
-  min-height: 132px;
-  display: grid;
-  align-content: space-between;
-  gap: 14px;
-  padding: 17px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background:
-    radial-gradient(circle at 18% 0%, rgba(200, 255, 99, 0.13), transparent 42%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.035));
-}
-
-.engagement-card span,
-.engagement-card small {
-  display: block;
-}
-
-.engagement-card span {
-  color: var(--muted);
-  font-size: 0.78rem;
-  font-weight: 800;
-  text-transform: uppercase;
-}
-
-.engagement-card strong {
-  color: var(--lime);
-  font-size: clamp(1.6rem, 3vw, 2.35rem);
-  line-height: 1;
-}
-
-.engagement-card small {
-  color: #c9d8ea;
-  line-height: 1.4;
-  font-weight: 760;
-}
-
-.panel-note {
-  max-width: 720px;
-  margin: 9px 0 0;
-  color: var(--muted);
-  line-height: 1.5;
-}
-
-.ai-panel {
-  border-color: rgba(200, 255, 99, 0.18);
-  background:
-    radial-gradient(circle at 14% 0%, rgba(200, 255, 99, 0.12), transparent 36%),
-    linear-gradient(155deg, rgba(16, 27, 44, 0.98), rgba(8, 18, 31, 0.96));
-}
-
-.ai-advisor {
-  display: grid;
-  grid-template-columns: minmax(260px, 0.9fr) minmax(0, 1.4fr);
-  gap: 16px;
-  align-items: stretch;
-}
-
-.ai-summary,
-.ai-action {
-  display: grid;
-  align-content: start;
-  gap: 10px;
-  border: 1px solid rgba(200, 255, 99, 0.16);
-  border-radius: 8px;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.035));
-}
-
-.ai-summary {
-  min-height: 100%;
-  padding: 22px;
-  border-color: rgba(200, 255, 99, 0.28);
-  background:
-    radial-gradient(circle at 20% 0%, rgba(200, 255, 99, 0.2), transparent 42%),
-    linear-gradient(150deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.035));
-}
-
-.ai-actions {
-  display: grid;
-  gap: 10px;
-}
-
-.ai-action {
-  min-height: 112px;
-  padding: 16px 18px;
-}
-
-.ai-summary span,
-.ai-action span {
-  color: var(--lime);
-  font-size: 0.76rem;
-  font-weight: 850;
-  text-transform: uppercase;
-}
-
-.ai-summary strong {
-  color: #ffffff;
-  font-size: clamp(1.45rem, 2.2vw, 2.1rem);
-  line-height: 1.08;
-}
-
-.ai-action strong {
-  color: #ffffff;
-  font-size: 1.02rem;
-  line-height: 1.28;
-}
-
-.ai-summary p,
-.ai-action p {
-  margin: 0;
-  color: #c9d8ea;
-  line-height: 1.5;
-  font-weight: 680;
-}
-
-.ai-pie-block {
-  display: grid;
-  grid-template-columns: 136px minmax(0, 1fr);
-  gap: 16px;
-  align-items: center;
-  margin-top: 8px;
-  padding-top: 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.ai-pie {
-  width: 136px;
-  aspect-ratio: 1;
-  display: grid;
-  place-items: center;
-  border-radius: 999px;
-  box-shadow:
-    inset 0 0 0 18px rgba(6, 16, 29, 0.72),
-    0 18px 36px rgba(0, 0, 0, 0.18);
-}
-
-.ai-pie strong,
-.ai-pie small {
-  display: block;
-  text-align: center;
-}
-
-.ai-pie strong {
-  color: #ffffff;
-  font-size: 1.35rem;
-  line-height: 1;
-}
-
-.ai-pie small {
-  margin-top: -28px;
-  color: var(--lime);
-  font-size: 0.72rem;
-  font-weight: 850;
-  text-transform: uppercase;
-}
-
-.ai-legend {
-  display: grid;
-  gap: 9px;
-  min-width: 0;
-}
-
-.ai-legend div {
-  display: grid;
-  grid-template-columns: 10px minmax(0, 1fr) max-content;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
-}
-
-.ai-legend i {
-  width: 10px;
-  height: 10px;
-  border-radius: 999px;
-}
-
-.ai-legend span {
-  color: #d7e5f7;
-  font-size: 0.8rem;
-  font-weight: 760;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.ai-legend strong {
-  color: #ffffff;
-  font-size: 0.86rem;
-}
-
-.ai-compare {
-  display: grid;
-  gap: 12px;
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.ai-compare-heading {
-  display: flex;
-  align-items: end;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.ai-compare-heading span {
-  color: var(--lime);
-  font-size: 0.76rem;
-  font-weight: 850;
-  text-transform: uppercase;
-}
-
-.ai-compare-heading strong {
-  color: #ffffff;
-  font-size: 0.9rem;
-}
-
-.ai-compare-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-}
-
-.ai-compare-item {
-  display: grid;
-  gap: 5px;
-  padding: 11px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.045);
-}
-
-.ai-compare-item.is-positive {
-  border-color: rgba(200, 255, 99, 0.24);
-  background: rgba(200, 255, 99, 0.07);
-}
-
-.ai-compare-item span,
-.ai-compare-item small {
-  color: var(--muted);
-  font-size: 0.72rem;
-  font-weight: 760;
-}
-
-.ai-compare-item strong {
-  color: #ffffff;
-  font-size: 1.12rem;
-  line-height: 1;
-}
-
-.ai-compare-item.is-positive strong {
-  color: var(--lime);
-}
-
-.ai-compare-empty {
-  margin: 0;
-  color: var(--muted);
-  line-height: 1.5;
-}
-
-.report-section {
-  gap: 22px;
-  margin-top: 22px;
-}
-
-.content-grid {
-  grid-template-columns: minmax(0, 1fr) 390px;
-  align-items: start;
-  gap: 22px;
-  margin-top: 22px;
-}
-
-.table-wrap {
-  width: 100%;
-  overflow-x: auto;
-}
-
-table {
-  width: 100%;
-  min-width: 820px;
-  border-collapse: collapse;
-}
-
-th,
-td {
-  padding: 15px 12px;
-  border-bottom: 1px solid var(--line);
-  text-align: left;
-  vertical-align: top;
-}
-
-th {
-  color: #d7e5f7;
-  font-size: 0.78rem;
-  text-transform: uppercase;
-}
-
-td {
-  color: var(--muted);
-}
-
-td strong {
-  display: block;
-  color: #ffffff;
-}
-
-.badge {
-  display: inline-flex;
-  align-items: center;
-  min-height: 28px;
-  padding: 4px 9px;
-  border-radius: 999px;
-  color: var(--lime);
-  background: rgba(184, 255, 77, 0.1);
-  font-size: 0.78rem;
-  font-weight: 850;
-}
-
-.badge.is-paused {
-  color: var(--amber);
-  background: rgba(209, 150, 21, 0.12);
-}
-
-.score-panel {
-  position: sticky;
-  top: 24px;
-  border-color: rgba(200, 255, 99, 0.18);
-  background:
-    radial-gradient(circle at 20% 0%, rgba(114, 167, 255, 0.12), transparent 44%),
-    linear-gradient(155deg, rgba(16, 27, 44, 0.98), rgba(22, 36, 58, 0.96));
-}
-
-.score-ring {
-  width: 190px;
-  height: 190px;
-  display: grid;
-  place-items: center;
-  margin: 22px auto;
-  border-radius: 999px;
-  background:
-    radial-gradient(circle at center, var(--surface) 57%, transparent 58%),
-    conic-gradient(
-      from -40deg,
-      var(--teal-bright) 0,
-      var(--blue) calc(var(--score, 0) * 0.72%),
-      var(--teal) calc(var(--score, 0) * 1%),
-      rgba(37, 99, 235, 0.1) 0
+const fixedClientName = document.querySelector("#fixedClientName");
+const campaignSelect = document.querySelector("#campaignSelect");
+const periodSelect = document.querySelector("#periodSelect");
+const dateFrom = document.querySelector("#dateFrom");
+const dateTo = document.querySelector("#dateTo");
+const applyDateFilter = document.querySelector("#applyDateFilter");
+const refreshData = document.querySelector("#refreshData");
+const clientTitle = document.querySelector("#clientTitle");
+const clientDescription = document.querySelector("#clientDescription");
+const accessClient = document.querySelector("#accessClient");
+const clientInitials = document.querySelector("#clientInitials");
+const updatedAt = document.querySelector("#updatedAt");
+const activeCampaigns = document.querySelector("#activeCampaigns");
+const metaAccount = document.querySelector("#metaAccount");
+const selectedRange = document.querySelector("#selectedRange");
+const metricGrid = document.querySelector("#metricGrid");
+const campaignTable = document.querySelector("#campaignTable");
+const connectionDot = document.querySelector("#connectionDot");
+const connectionLabel = document.querySelector("#connectionLabel");
+const connectionDetail = document.querySelector("#connectionDetail");
+const barChart = document.querySelector("#barChart");
+const engagementGrid = document.querySelector("#engagementGrid");
+const aiInsights = document.querySelector("#aiInsights");
+const followerChart = document.querySelector("#followerChart");
+const chartButtons = Array.from(document.querySelectorAll("[data-chart-metric]"));
+const exportCsv = document.querySelector("#exportCsv");
+
+const useMockMetaApi = false;
+const mockDateRange = {
+  from: "2026-04-01",
+  to: "2026-07-22",
+};
+
+const monthNames = {
+  gennaio: 1,
+  gen: 1,
+  febbraio: 2,
+  feb: 2,
+  marzo: 3,
+  mar: 3,
+  aprile: 4,
+  apr: 4,
+  maggio: 5,
+  mag: 5,
+  giugno: 6,
+  giu: 6,
+  luglio: 7,
+  lug: 7,
+  agosto: 8,
+  ago: 8,
+  settembre: 9,
+  set: 9,
+  ottobre: 10,
+  ott: 10,
+  novembre: 11,
+  nov: 11,
+  dicembre: 12,
+  dic: 12,
+};
+
+const clients = [
+  {
+    id: "salottidea",
+    name: "Salottidea",
+    description:
+      "Andamento delle campagne social nel periodo selezionato.",
+    metaAccount: "act_8122658294482022",
+    endpoint: "/api/meta-insights",
+  },
+];
+
+const fallbackReports = {
+  salottidea: {
+    date_start: mockDateRange.from,
+    date_stop: mockDateRange.to,
+    updatedAt: "2026-06-12T08:45:00.000Z",
+    campaigns: [
+      {
+        id: "cmp-101",
+        name: "Promozione showroom",
+        status: "ACTIVE",
+        objective: "Lead generation",
+        spend: 846.5,
+        impressions: 118420,
+        reach: 64200,
+        clicks: 2180,
+        leads: 142,
+        purchases: 0,
+        revenue: 0,
+        daily: [
+          ["2026-05-30", 28, 71, 4],
+          ["2026-05-31", 33, 84, 5],
+          ["2026-06-01", 29, 80, 4],
+          ["2026-06-02", 31, 86, 6],
+          ["2026-06-03", 36, 96, 7],
+          ["2026-06-04", 42, 111, 9],
+          ["2026-06-05", 44, 122, 8],
+          ["2026-06-06", 51, 148, 12],
+          ["2026-06-07", 56, 166, 13],
+          ["2026-06-08", 63, 172, 14],
+          ["2026-06-09", 70, 189, 15],
+          ["2026-06-10", 76, 204, 17],
+          ["2026-06-11", 81, 221, 18],
+          ["2026-06-12", 86, 230, 20],
+        ],
+      },
+      {
+        id: "cmp-102",
+        name: "Collezione divani",
+        status: "ACTIVE",
+        objective: "Traffico landing",
+        spend: 392.2,
+        impressions: 72480,
+        reach: 38840,
+        clicks: 1362,
+        leads: 49,
+        purchases: 18,
+        revenue: 1890,
+        daily: [
+          ["2026-05-30", 14, 42, 1],
+          ["2026-05-31", 16, 44, 2],
+          ["2026-06-01", 15, 48, 2],
+          ["2026-06-02", 18, 55, 2],
+          ["2026-06-03", 19, 59, 3],
+          ["2026-06-04", 21, 64, 3],
+          ["2026-06-05", 24, 71, 3],
+          ["2026-06-06", 26, 78, 4],
+          ["2026-06-07", 27, 83, 4],
+          ["2026-06-08", 30, 89, 5],
+          ["2026-06-09", 32, 94, 5],
+          ["2026-06-10", 34, 99, 5],
+          ["2026-06-11", 38, 105, 5],
+          ["2026-06-12", 39, 111, 5],
+        ],
+      },
+      {
+        id: "cmp-103",
+        name: "Retargeting sito",
+        status: "PAUSED",
+        objective: "Remarketing",
+        spend: 126.8,
+        impressions: 18400,
+        reach: 8100,
+        clicks: 511,
+        leads: 21,
+        purchases: 7,
+        revenue: 735,
+        daily: [
+          ["2026-05-30", 6, 19, 1],
+          ["2026-05-31", 7, 21, 1],
+          ["2026-06-01", 6, 22, 1],
+          ["2026-06-02", 8, 27, 1],
+          ["2026-06-03", 8, 30, 1],
+          ["2026-06-04", 9, 33, 2],
+          ["2026-06-05", 10, 36, 2],
+          ["2026-06-06", 11, 41, 2],
+          ["2026-06-07", 11, 44, 2],
+          ["2026-06-08", 12, 47, 2],
+          ["2026-06-09", 13, 51, 2],
+          ["2026-06-10", 14, 53, 2],
+          ["2026-06-11", 15, 55, 2],
+          ["2026-06-12", 16, 62, 3],
+        ],
+      },
+    ],
+  },
+};
+
+let currentClient = clients[0];
+let currentFullReport = fallbackReports[currentClient.id];
+let currentReport = fallbackReports[currentClient.id];
+let activeChartMetric = "spend";
+let currentConnectionMode = "mock";
+let selectedCampaignId = "all";
+let isManualRange = false;
+let campaignOptionsCache = [];
+
+function escapeHtml(text) {
+  const div = document.createElement("div");
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function clamp(value) {
+  return Math.max(0, Math.min(100, Math.round(value)));
+}
+
+function formatNumber(value) {
+  return new Intl.NumberFormat("it-IT").format(Math.round(Number(value) || 0));
+}
+
+function formatDecimal(value, digits = 2) {
+  return new Intl.NumberFormat("it-IT", {
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
+  }).format(Number(value) || 0);
+}
+
+function formatCurrency(value) {
+  return new Intl.NumberFormat("it-IT", {
+    style: "currency",
+    currency: "EUR",
+    maximumFractionDigits: 0,
+  }).format(Number(value) || 0);
+}
+
+function formatDateTime(value) {
+  if (!value) return "-";
+  return new Intl.DateTimeFormat("it-IT", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date(value));
+}
+
+function formatDate(value) {
+  if (!value) return "-";
+  return new Intl.DateTimeFormat("it-IT", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(new Date(`${value}T00:00:00`));
+}
+
+function initials(name) {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase();
+}
+
+function hasMetric(item, keys) {
+  return keys.some((key) => item?.[key] !== undefined && item?.[key] !== null && item?.[key] !== "");
+}
+
+function normalizeDaily(item) {
+  if (Array.isArray(item)) {
+    return {
+      date: item[0],
+      spend: Number(item[1]) || 0,
+      clicks: Number(item[2]) || 0,
+      leads: Number(item[3]) || 0,
+      impressions: Number(item[4]) || 0,
+      reach: Number(item[5]) || 0,
+      likes: Number(item[6]) || 0,
+      comments: Number(item[7]) || 0,
+      shares: Number(item[8]) || 0,
+      purchases: Number(item[9]) || 0,
+      revenue: Number(item[10]) || 0,
+      followersGained: Number(item[11]) || 0,
+      followersLost: Number(item[12]) || 0,
+      _hasImpressions: item.length > 4,
+      _hasReach: item.length > 5,
+      _hasLikes: item.length > 6,
+      _hasComments: item.length > 7,
+      _hasShares: item.length > 8,
+      _hasPurchases: item.length > 9,
+      _hasRevenue: item.length > 10,
+      _hasFollowersGained: item.length > 11,
+      _hasFollowersLost: item.length > 12,
+    };
+  }
+
+  return {
+    date: item.date || item.date_start || "",
+    spend: Number(item.spend) || 0,
+    impressions: Number(item.impressions) || 0,
+    reach: Number(item.reach) || 0,
+    clicks: Number(item.clicks) || 0,
+    likes: Number(item.likes || item.post_reactions || item.reactions) || 0,
+    comments: Number(item.comments) || 0,
+    shares: Number(item.shares) || 0,
+    leads: Number(item.leads || item.lead || item.actions_lead) || 0,
+    purchases: Number(item.purchases || item.purchase) || 0,
+    revenue: Number(item.revenue || item.purchase_value) || 0,
+    followersGained: Number(item.followersGained || item.followers_gained || item.follows) || 0,
+    followersLost: Number(item.followersLost || item.followers_lost || item.unfollows) || 0,
+    _hasImpressions: hasMetric(item, ["impressions"]),
+    _hasReach: hasMetric(item, ["reach"]),
+    _hasLikes: hasMetric(item, ["likes", "post_reactions", "reactions"]),
+    _hasComments: hasMetric(item, ["comments"]),
+    _hasShares: hasMetric(item, ["shares"]),
+    _hasPurchases: hasMetric(item, ["purchases", "purchase"]),
+    _hasRevenue: hasMetric(item, ["revenue", "purchase_value"]),
+    _hasFollowersGained: hasMetric(item, ["followersGained", "followers_gained", "follows"]),
+    _hasFollowersLost: hasMetric(item, ["followersLost", "followers_lost", "unfollows"]),
+  };
+}
+
+function enrichDailyMetrics(campaign, daily) {
+  const spendTotal = daily.reduce((sum, day) => sum + day.spend, 0);
+  const clickTotal = daily.reduce((sum, day) => sum + day.clicks, 0);
+  const leadTotal = daily.reduce((sum, day) => sum + day.leads, 0);
+
+  return daily.map((day) => {
+    const spendWeight = spendTotal > 0 ? day.spend / spendTotal : 0;
+    const clickWeight = clickTotal > 0 ? day.clicks / clickTotal : spendWeight;
+    const leadWeight = leadTotal > 0 ? day.leads / leadTotal : clickWeight;
+    const impressions = day._hasImpressions ? day.impressions : Math.round(campaign.impressions * clickWeight);
+    const reach = day._hasReach ? day.reach : Math.round(campaign.reach * clickWeight);
+    const likes = day._hasLikes ? day.likes : Math.round(day.clicks * 0.32 + day.leads * 1.6);
+    const comments = day._hasComments ? day.comments : Math.round(day.leads * 0.42 + day.clicks * 0.015);
+    const shares = day._hasShares ? day.shares : Math.round(likes * 0.13);
+    const followersGained = day._hasFollowersGained
+      ? day.followersGained
+      : Math.round(day.leads * 0.32 + day.clicks * 0.018);
+    const followersLost = day._hasFollowersLost ? day.followersLost : Math.round(day.clicks * 0.006);
+
+    return {
+      ...day,
+      impressions,
+      reach,
+      likes,
+      comments,
+      shares,
+      followersGained,
+      followersLost,
+      purchases: day._hasPurchases ? day.purchases : Math.round(campaign.purchases * leadWeight),
+      revenue: day._hasRevenue ? day.revenue : Number((campaign.revenue * leadWeight).toFixed(2)),
+    };
+  });
+}
+
+function normalizeCampaign(campaign) {
+  const clicks = Number(campaign.clicks) || 0;
+  const impressions = Number(campaign.impressions) || 0;
+  const spend = Number(campaign.spend) || 0;
+  const leads = Number(campaign.leads || campaign.results || 0) || 0;
+  const likes = Number(campaign.likes || campaign.post_reactions || campaign.reactions || 0) || 0;
+  const comments = Number(campaign.comments || 0) || 0;
+  const shares = Number(campaign.shares || 0) || 0;
+  const followersGained = Number(campaign.followersGained || campaign.followers_gained || 0) || 0;
+  const followersLost = Number(campaign.followersLost || campaign.followers_lost || 0) || 0;
+  const normalized = {
+    id: campaign.id || campaign.campaign_id || crypto.randomUUID(),
+    name: campaign.name || campaign.campaign_name || "Campagna senza nome",
+    status: campaign.status || campaign.effective_status || "UNKNOWN",
+    objective: campaign.objective || campaign.objective_label || "-",
+    spend,
+    impressions,
+    reach: Number(campaign.reach) || 0,
+    clicks,
+    likes,
+    comments,
+    shares,
+    followersGained,
+    followersLost,
+    leads,
+    purchases: Number(campaign.purchases || 0) || 0,
+    revenue: Number(campaign.revenue || campaign.purchase_value || 0) || 0,
+    daily: (campaign.daily || []).map(normalizeDaily),
+  };
+
+  return {
+    ...normalized,
+    daily: enrichDailyMetrics(normalized, normalized.daily),
+  };
+}
+
+function getDateBounds(report) {
+  const dates = report.campaigns
+    .flatMap((campaign) => campaign.daily.map((day) => day.date))
+    .filter(Boolean)
+    .sort();
+
+  return {
+    min: dates[0] || "",
+    max: dates[dates.length - 1] || "",
+  };
+}
+
+function isoDate(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function addDays(value, amount) {
+  const date = new Date(`${value}T00:00:00`);
+  date.setDate(date.getDate() + amount);
+  return isoDate(date);
+}
+
+function normalizeYear(value) {
+  const year = Number(value);
+  if (!Number.isFinite(year)) return null;
+  return year < 100 ? 2000 + year : year;
+}
+
+function getMonthEnd(year, month) {
+  const day = new Date(year, month, 0).getDate();
+  return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+}
+
+function capRangeToToday(range) {
+  const today = isoDate(new Date());
+  return {
+    from: range.from,
+    to: range.to > today ? today : range.to,
+  };
+}
+
+function getCampaignMonthRange(campaign) {
+  const name = (campaign?.name || "").toLowerCase();
+  const monthPattern =
+    /(gennaio|febbraio|marzo|aprile|maggio|giugno|luglio|agosto|settembre|ottobre|novembre|dicembre|gen|feb|mar|apr|mag|giu|lug|ago|set|ott|nov|dic)\s*[-_/ ]*\s*(\d{2,4})?/g;
+  const matches = [];
+  let match = monthPattern.exec(name);
+
+  while (match) {
+    matches.push({
+      month: monthNames[match[1]],
+      year: match[2] ? normalizeYear(match[2]) : null,
+    });
+    match = monthPattern.exec(name);
+  }
+
+  if (matches.length === 0) return null;
+  const year = [...matches].reverse().find((item) => item.year)?.year;
+  if (!year) return null;
+
+  const firstMonth = matches[0].month;
+  const lastMonth = matches[matches.length - 1].month;
+
+  return capRangeToToday({
+    from: `${year}-${String(firstMonth).padStart(2, "0")}-01`,
+    to: getMonthEnd(year, lastMonth),
+  });
+}
+
+function getCampaignSortValue(campaign) {
+  const range = getCampaignMonthRange(campaign);
+  if (!range?.from) return 0;
+  return Number(range.from.replaceAll("-", ""));
+}
+
+function sortCampaignOptions(campaigns) {
+  campaigns.sort((a, b) => {
+    const dateDifference = getCampaignSortValue(b) - getCampaignSortValue(a);
+    if (dateDifference !== 0) return dateDifference;
+    return a.name.localeCompare(b.name, "it");
+  });
+}
+
+function getQuickRange(report, period) {
+  const bounds = getDateBounds(report);
+  const max = report?.date_stop || bounds.max || mockDateRange.to || isoDate(new Date());
+  const maxDate = new Date(`${max}T00:00:00`);
+
+  if (period === "last_7d") {
+    return { from: addDays(max, -6), to: max };
+  }
+
+  if (period === "this_month") {
+    return { from: `${max.slice(0, 7)}-01`, to: max };
+  }
+
+  if (period === "last_month") {
+    const firstOfThisMonth = new Date(maxDate.getFullYear(), maxDate.getMonth(), 1);
+    const lastOfPreviousMonth = new Date(firstOfThisMonth);
+    lastOfPreviousMonth.setDate(0);
+    const firstOfPreviousMonth = new Date(
+      lastOfPreviousMonth.getFullYear(),
+      lastOfPreviousMonth.getMonth(),
+      1
     );
-  box-shadow:
-    0 0 0 10px rgba(15, 118, 110, 0.05),
-    0 20px 42px rgba(15, 118, 110, 0.14);
-}
-
-.score-ring strong {
-  font-size: 3.3rem;
-  line-height: 1;
-}
-
-.score-ring span {
-  margin-top: -58px;
-  color: var(--lime);
-  font-weight: 850;
-}
-
-.score-bars {
-  display: grid;
-  gap: 12px;
-}
-
-.score-bars div {
-  display: grid;
-  gap: 6px;
-}
-
-.score-bars span {
-  color: #d7e5f7;
-  font-size: 0.86rem;
-  font-weight: 800;
-}
-
-progress {
-  width: 100%;
-  height: 12px;
-  border: 0;
-  border-radius: 999px;
-  overflow: hidden;
-  background: rgba(255, 255, 255, 0.08);
-}
-
-progress::-webkit-progress-bar {
-  background: rgba(255, 255, 255, 0.08);
-}
-
-progress::-webkit-progress-value {
-  background: linear-gradient(90deg, var(--blue), var(--teal-bright), var(--green));
-}
-
-progress::-moz-progress-bar {
-  background: linear-gradient(90deg, var(--blue), var(--teal-bright), var(--green));
-}
-
-.chart-tabs {
-  display: inline-grid;
-  grid-template-columns: repeat(5, max-content);
-  gap: 6px;
-  margin-bottom: 18px;
-  padding: 5px;
-  border-radius: 8px;
-  background: var(--soft);
-  border: 1px solid var(--line);
-}
-
-.chart-tabs button {
-  min-height: 34px;
-  padding: 0 12px;
-  color: var(--muted);
-  background: transparent;
-  box-shadow: none;
-}
-
-.chart-tabs button.is-active {
-  color: #07111f;
-  background: var(--lime);
-}
-
-.bar-chart {
-  min-height: 310px;
-  display: grid;
-  grid-template-columns: repeat(14, minmax(26px, 1fr));
-  align-items: end;
-  gap: 10px;
-  padding: 18px 8px 0;
-  border-top: 1px solid var(--line);
-}
-
-.bar {
-  display: grid;
-  align-items: end;
-  gap: 8px;
-  min-height: 252px;
-}
-
-.bar-fill {
-  width: 100%;
-  min-height: 8px;
-  border-radius: 8px 8px 0 0;
-  background: linear-gradient(180deg, var(--lime), var(--blue));
-}
-
-.bar small {
-  display: block;
-  color: var(--muted);
-  font-size: 0.72rem;
-  text-align: center;
-}
-
-.bar-value {
-  display: block;
-  color: #ffffff;
-  font-size: 0.7rem;
-  font-weight: 850;
-  line-height: 1;
-  text-align: center;
-  white-space: nowrap;
-}
-
-.follower-chart {
-  --follower-columns: 14;
-  min-height: 330px;
-  display: grid;
-  grid-template-columns: repeat(var(--follower-columns), minmax(34px, 1fr));
-  align-items: stretch;
-  gap: 9px;
-  padding: 12px 8px 0;
-  border-top: 1px solid var(--line);
-  overflow-x: auto;
-}
-
-.follower-day {
-  min-height: 296px;
-  display: grid;
-  grid-template-rows: 24px 1fr 24px 20px;
-  align-items: center;
-  gap: 6px;
-}
-
-.follower-bars {
-  position: relative;
-  height: 208px;
-  display: grid;
-  grid-template-rows: 1fr 1fr;
-  align-items: end;
-}
-
-.follower-baseline {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  height: 1px;
-  background: rgba(255, 255, 255, 0.22);
-}
-
-.follower-bar {
-  width: 100%;
-  min-height: 4px;
-  border-radius: 8px;
-}
-
-.follower-bar.is-gain {
-  align-self: end;
-  background: linear-gradient(180deg, var(--lime), #7dd3fc);
-}
-
-.follower-bar.is-loss {
-  align-self: start;
-  background: linear-gradient(180deg, rgba(255, 138, 112, 0.92), rgba(255, 138, 112, 0.42));
-}
-
-.follower-value {
-  display: block;
-  color: var(--muted);
-  font-size: 0.72rem;
-  font-weight: 820;
-  text-align: center;
-}
-
-.follower-value.is-gain,
-.follower-value.is-net {
-  color: var(--lime);
-}
-
-.follower-value.is-net {
-  color: #d7e5f7;
-}
-
-.follower-day small {
-  display: block;
-  color: var(--muted);
-  font-size: 0.72rem;
-  text-align: center;
-}
-
-ol {
-  margin: 0;
-  padding-left: 22px;
-  color: var(--muted);
-  line-height: 1.6;
-}
-
-ol li + li {
-  margin-top: 12px;
-}
-
-.integration-panel {
-  margin-top: 22px;
-}
-
-.integration-grid {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
-}
-
-.integration-grid > div {
-  padding: 18px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--surface-strong);
-}
-
-code {
-  display: inline-block;
-  max-width: 100%;
-  padding: 3px 6px;
-  border-radius: 6px;
-  color: var(--lime);
-  background: rgba(200, 255, 99, 0.09);
-  overflow-wrap: anywhere;
-}
-
-details {
-  margin-top: 18px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--surface-strong);
-}
-
-summary {
-  cursor: pointer;
-  padding: 15px 18px;
-  color: var(--lime);
-  font-weight: 850;
-}
-
-pre {
-  margin: 0;
-  padding: 0 18px 18px;
-  overflow-x: auto;
-}
-
-pre code {
-  display: block;
-  padding: 16px;
-  color: var(--ink);
-  background: rgba(255, 255, 255, 0.07);
-}
-
-@media (max-width: 1120px) {
-  .app-shell {
-    grid-template-columns: 1fr;
+    return { from: isoDate(firstOfPreviousMonth), to: isoDate(lastOfPreviousMonth) };
   }
 
-  .sidebar {
-    position: static;
-    height: auto;
+  return { from: addDays(max, -29), to: max };
+}
+
+function syncDateInputsFromPeriod(report) {
+  if (isManualRange) return;
+  const range = getQuickRange(report, periodSelect.value);
+  dateFrom.value = range.from;
+  dateTo.value = range.to;
+}
+
+function getSelectedRange() {
+  const from = dateFrom.value;
+  const to = dateTo.value || from;
+
+  if (!from && !to) return { from: "", to: "" };
+  if (from && to && from > to) return { from: to, to: from };
+  return { from, to };
+}
+
+function getCampaignForRange(campaign, range, reportRange = {}) {
+  const selectedDaily = campaign.daily.filter((day) => {
+    if (range.from && day.date < range.from) return false;
+    if (range.to && day.date > range.to) return false;
+    return true;
+  });
+
+  if (campaign.daily.length === 0) return campaign;
+
+  const usesFullReportRange =
+    (!range.from || range.from === reportRange.from) && (!range.to || range.to === reportRange.to);
+
+  const filteredCampaign = selectedDaily.reduce(
+    (acc, day) => {
+      acc.spend += day.spend;
+      acc.impressions += day.impressions;
+      acc.reach += day.reach;
+      acc.clicks += day.clicks;
+      acc.likes += day.likes;
+      acc.comments += day.comments;
+      acc.shares += day.shares;
+      acc.followersGained += day.followersGained;
+      acc.followersLost += day.followersLost;
+      acc.leads += day.leads;
+      acc.purchases += day.purchases;
+      acc.revenue += day.revenue;
+      return acc;
+    },
+    {
+      ...campaign,
+      spend: 0,
+      impressions: 0,
+      reach: 0,
+      clicks: 0,
+      likes: 0,
+      comments: 0,
+      shares: 0,
+      followersGained: 0,
+      followersLost: 0,
+      leads: 0,
+      purchases: 0,
+      revenue: 0,
+      daily: selectedDaily,
+    }
+  );
+
+  if (usesFullReportRange) {
+    filteredCampaign.reach = campaign.reach;
   }
 
-  .sidebar nav {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+  return filteredCampaign;
+}
+
+function getFilteredReport(report) {
+  const range = getSelectedRange();
+  const reportRange = {
+    from: report.date_start,
+    to: report.date_stop,
+  };
+  const dateFilteredCampaigns = report.campaigns.map((campaign) =>
+    getCampaignForRange(campaign, range, reportRange)
+  );
+
+  return {
+    ...report,
+    campaigns:
+      selectedCampaignId === "all"
+        ? dateFilteredCampaigns
+        : dateFilteredCampaigns.filter((campaign) => campaign.id === selectedCampaignId),
+  };
+}
+
+function normalizeCampaignOption(campaign) {
+  return {
+    id: campaign.id,
+    name: campaign.name || "Campagna senza nome",
+    status: campaign.effective_status || campaign.status || "ACTIVE",
+    objective: campaign.objective || "-",
+  };
+}
+
+function rememberCampaignOptions(campaigns = []) {
+  campaigns.forEach((campaign) => {
+    if (!campaign?.id) return;
+    const option = normalizeCampaignOption(campaign);
+    const existingIndex = campaignOptionsCache.findIndex((item) => item.id === option.id);
+
+    if (existingIndex === -1) {
+      campaignOptionsCache.push(option);
+      return;
+    }
+
+    campaignOptionsCache[existingIndex] = {
+      ...campaignOptionsCache[existingIndex],
+      ...option,
+    };
+  });
+
+  sortCampaignOptions(campaignOptionsCache);
+}
+
+function normalizeReport(payload, fallback) {
+  const sourceCampaigns = payload?.campaigns || payload?.data || fallback.campaigns;
+  const payloadAvailableCampaigns =
+    Array.isArray(payload?.availableCampaigns) && payload.availableCampaigns.length > 0
+      ? payload.availableCampaigns
+      : [];
+
+  rememberCampaignOptions(payloadAvailableCampaigns);
+  rememberCampaignOptions(sourceCampaigns);
+
+  const sourceAvailableCampaigns =
+    campaignOptionsCache.length > 0
+      ? campaignOptionsCache
+      : payloadAvailableCampaigns.length > 0
+        ? payloadAvailableCampaigns
+        : sourceCampaigns;
+
+  return {
+    updatedAt: payload?.updatedAt || payload?.updated_time || new Date().toISOString(),
+    date_start: payload?.date_start || fallback?.date_start || mockDateRange.from,
+    date_stop: payload?.date_stop || fallback?.date_stop || mockDateRange.to,
+    comparison: payload?.comparison || null,
+    availableCampaigns: sourceAvailableCampaigns.map(normalizeCampaignOption),
+    campaigns: sourceCampaigns.map(normalizeCampaign),
+  };
+}
+
+function getTotals(report) {
+  const totals = report.campaigns.reduce(
+    (acc, campaign) => {
+      acc.spend += campaign.spend;
+      acc.impressions += campaign.impressions;
+      acc.reach += campaign.reach;
+      acc.clicks += campaign.clicks;
+      acc.likes += campaign.likes;
+      acc.comments += campaign.comments;
+      acc.shares += campaign.shares;
+      acc.followersGained += campaign.followersGained;
+      acc.followersLost += campaign.followersLost;
+      acc.leads += campaign.leads;
+      acc.purchases += campaign.purchases;
+      acc.revenue += campaign.revenue;
+      return acc;
+    },
+    {
+      spend: 0,
+      impressions: 0,
+      reach: 0,
+      clicks: 0,
+      likes: 0,
+      comments: 0,
+      shares: 0,
+      followersGained: 0,
+      followersLost: 0,
+      leads: 0,
+      purchases: 0,
+      revenue: 0,
+    }
+  );
+
+  totals.ctr = totals.impressions > 0 ? (totals.clicks / totals.impressions) * 100 : 0;
+  totals.cpc = totals.clicks > 0 ? totals.spend / totals.clicks : 0;
+  totals.cpl = totals.leads > 0 ? totals.spend / totals.leads : 0;
+  totals.roas = totals.spend > 0 ? totals.revenue / totals.spend : 0;
+  totals.engagement = totals.likes + totals.comments + totals.shares;
+  totals.engagementRate =
+    totals.reach > 0 ? (totals.engagement / totals.reach) * 100 : 0;
+  totals.netFollowers = totals.followersGained - totals.followersLost;
+  return totals;
+}
+
+function aggregateDaily(report, limit = 14) {
+  const byDate = new Map();
+
+  report.campaigns.forEach((campaign) => {
+    campaign.daily.forEach((day) => {
+      const current = byDate.get(day.date) || {
+        date: day.date,
+        spend: 0,
+        clicks: 0,
+        likes: 0,
+        comments: 0,
+        shares: 0,
+        leads: 0,
+        impressions: 0,
+        reach: 0,
+        followersGained: 0,
+        followersLost: 0,
+      };
+      current.spend += day.spend;
+      current.clicks += day.clicks;
+      current.likes += day.likes;
+      current.comments += day.comments;
+      current.shares += day.shares;
+      current.leads += day.leads;
+      current.impressions += day.impressions;
+      current.reach += day.reach;
+      current.followersGained += day.followersGained;
+      current.followersLost += day.followersLost;
+      byDate.set(day.date, current);
+    });
+  });
+
+  const days = Array.from(byDate.values()).sort((a, b) => a.date.localeCompare(b.date));
+  return limit ? days.slice(-limit) : days;
+}
+
+function renderCampaignOptions(report) {
+  const campaignOptions =
+    campaignOptionsCache.length > 0 ? campaignOptionsCache : report.availableCampaigns || report.campaigns;
+  const activeCampaignsList = campaignOptions.filter((campaign) => campaign.status === "ACTIVE");
+  const hasSelectedCampaign = activeCampaignsList.some(
+    (campaign) => campaign.id === selectedCampaignId
+  );
+
+  if (selectedCampaignId !== "all" && !hasSelectedCampaign) {
+    selectedCampaignId = "all";
   }
 
-  .access-card {
-    margin-top: 0;
+  campaignSelect.innerHTML = [
+    '<option value="all">Tutte le campagne</option>',
+    ...activeCampaignsList.map(
+      (campaign) => `<option value="${escapeHtml(campaign.id)}">${escapeHtml(campaign.name)}</option>`
+    ),
+  ].join("");
+  campaignSelect.value = selectedCampaignId;
+}
+
+function renderStatus(mode, detail) {
+  currentConnectionMode = mode;
+  connectionDot.classList.toggle("is-live", mode === "live");
+  connectionDot.classList.toggle("is-error", mode === "error");
+
+  if (mode === "mock") {
+    connectionDot.classList.add("is-live");
+    connectionDot.classList.remove("is-error");
+    connectionLabel.textContent = "Dati aggiornati";
+    connectionDetail.textContent = detail || "Report aggiornato.";
+    return;
   }
 
-  .topbar,
-  .date-query-panel,
-  .content-grid,
-  .integration-grid {
-    grid-template-columns: 1fr;
+  if (mode === "live") {
+    connectionLabel.textContent = "Dati aggiornati";
+    connectionDetail.textContent = detail || "Report aggiornato.";
+    return;
   }
 
-  .top-actions {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+  if (mode === "error") {
+    connectionLabel.textContent = "Dati non aggiornati";
+    connectionDetail.textContent =
+      detail || "Meta non ha restituito dati aggiornati.";
+    return;
   }
 
-  .date-controls {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+  connectionLabel.textContent = "Dati aggiornati";
+  connectionDetail.textContent = detail || "Report aggiornato.";
+}
+
+function renderMetrics(totals) {
+  const cards = [
+    ["Spesa", formatCurrency(totals.spend), "Budget investito nel periodo"],
+    ["Impression", formatNumber(totals.impressions), "Visualizzazioni generate"],
+    ["Copertura", formatNumber(totals.reach), "Persone raggiunte nel periodo"],
+    ["Click", formatNumber(totals.clicks), `CTR ${formatDecimal(totals.ctr)}%`],
+    ["Like", formatNumber(totals.likes), `${formatNumber(totals.engagement)} interazioni totali`],
+    ["Commenti", formatNumber(totals.comments), `${formatNumber(totals.shares)} condivisioni`],
+    ["CPC medio", formatCurrency(totals.cpc), "Costo medio per click"],
+    ["Visualizzazioni contenuti sul sito web", formatNumber(totals.leads), `Costo medio ${formatCurrency(totals.cpl)}`],
+    ["ROAS", `${formatDecimal(totals.roas, 1)}x`, "Ricavi / spesa adv"],
+    [
+      "Conversion rate",
+      `${formatDecimal(totals.clicks > 0 ? (totals.leads / totals.clicks) * 100 : 0)}%`,
+      "Visualizzazioni contenuti sui click",
+    ],
+  ];
+
+  metricGrid.innerHTML = cards
+    .map(
+      ([label, value, note]) => `
+        <article class="metric-card">
+          <div>
+            <span>${escapeHtml(label)}</span>
+            <strong>${escapeHtml(value)}</strong>
+          </div>
+          <small>${escapeHtml(note)}</small>
+        </article>
+      `
+    )
+    .join("");
+}
+
+function renderCampaigns(report) {
+  campaignTable.innerHTML = report.campaigns
+    .map((campaign) => {
+      const ctr = campaign.impressions > 0 ? (campaign.clicks / campaign.impressions) * 100 : 0;
+      const cpc = campaign.clicks > 0 ? campaign.spend / campaign.clicks : 0;
+      const paused = campaign.status !== "ACTIVE";
+
+      return `
+        <tr>
+          <td><strong>${escapeHtml(campaign.name)}</strong><span>${escapeHtml(campaign.id)}</span></td>
+          <td>${escapeHtml(campaign.objective)}</td>
+          <td>${formatCurrency(campaign.spend)}</td>
+          <td>${formatNumber(campaign.reach)}</td>
+          <td>${formatDecimal(ctr)}%</td>
+          <td>${formatCurrency(cpc)}</td>
+          <td>${formatNumber(campaign.likes)}</td>
+          <td>${formatNumber(campaign.leads)}</td>
+          <td><span class="badge ${paused ? "is-paused" : ""}">${escapeHtml(campaign.status)}</span></td>
+        </tr>
+      `;
+    })
+    .join("");
+}
+
+function renderEngagement(totals, report) {
+  const days = aggregateDaily(report, 0);
+  const averageEngagement =
+    days.length > 0 ? totals.engagement / days.length : 0;
+  const averageRate =
+    days.length > 0
+      ? days.reduce((sum, day) => {
+          const interactions = day.likes + day.comments + day.shares;
+          return sum + (day.reach > 0 ? (interactions / day.reach) * 100 : 0);
+        }, 0) / days.length
+      : 0;
+
+  const cards = [
+    ["Engagement rate", `${formatDecimal(totals.engagementRate)}%`, "Interazioni / persone raggiunte"],
+    ["Interazioni totali", formatNumber(totals.engagement), "Like, commenti e condivisioni"],
+    ["Media giornaliera", formatNumber(averageEngagement), "Interazioni medie nel periodo"],
+    ["ER medio giorno", `${formatDecimal(averageRate)}%`, "Media dei giorni selezionati"],
+  ];
+
+  engagementGrid.innerHTML = cards
+    .map(
+      ([label, value, note]) => `
+        <article class="engagement-card">
+          <span>${escapeHtml(label)}</span>
+          <strong>${escapeHtml(value)}</strong>
+          <small>${escapeHtml(note)}</small>
+        </article>
+      `
+    )
+    .join("");
+}
+
+function getCampaignEfficiency(campaign) {
+  const ctr = campaign.impressions > 0 ? (campaign.clicks / campaign.impressions) * 100 : 0;
+  const cpc = campaign.clicks > 0 ? campaign.spend / campaign.clicks : 0;
+  const contentCost = campaign.leads > 0 ? campaign.spend / campaign.leads : 0;
+  const engagementRate =
+    campaign.reach > 0
+      ? ((campaign.likes + campaign.comments + campaign.shares) / campaign.reach) * 100
+      : 0;
+
+  return {
+    ...campaign,
+    ctr,
+    cpc,
+    contentCost,
+    engagementRate,
+  };
+}
+
+function pickBestCampaign(campaigns, metric, direction = "max") {
+  const filtered = campaigns.filter((campaign) => Number.isFinite(campaign[metric]) && campaign[metric] > 0);
+  if (filtered.length === 0) return null;
+
+  return filtered.reduce((best, campaign) => {
+    if (!best) return campaign;
+    return direction === "min"
+      ? campaign[metric] < best[metric]
+        ? campaign
+        : best
+      : campaign[metric] > best[metric]
+        ? campaign
+        : best;
+  }, null);
+}
+
+function getBudgetAllocation(campaigns) {
+  const colors = ["#c8ff63", "#5eead4", "#72a7ff"];
+  const ranked = campaigns
+    .map((campaign) => {
+      const contentEfficiency = campaign.contentCost > 0 ? 12 / campaign.contentCost : 0;
+      const clickEfficiency = campaign.cpc > 0 ? 4 / campaign.cpc : 0;
+      const score = campaign.ctr * 2 + campaign.engagementRate + contentEfficiency + clickEfficiency;
+      return { ...campaign, score: Math.max(score, 0) };
+    })
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 3);
+
+  if (ranked.length === 0) return [];
+
+  const scoreTotal = ranked.reduce((sum, campaign) => sum + campaign.score, 0);
+  let allocated = 0;
+
+  return ranked.map((campaign, index) => {
+    const rawPercentage =
+      scoreTotal > 0 ? (campaign.score / scoreTotal) * 100 : 100 / ranked.length;
+    const percentage =
+      index === ranked.length - 1 ? Math.max(0, 100 - allocated) : Math.max(10, Math.round(rawPercentage));
+    allocated += percentage;
+
+    return {
+      name: campaign.name,
+      percentage,
+      color: colors[index],
+    };
+  });
+}
+
+function getPieGradient(allocation) {
+  let cursor = 0;
+  const segments = allocation.map((item) => {
+    const start = cursor;
+    cursor += item.percentage;
+    return `${item.color} ${start}% ${cursor}%`;
+  });
+
+  return `conic-gradient(${segments.join(", ")})`;
+}
+
+function getPercentChange(current, previous) {
+  if (!previous) return null;
+  return ((current - previous) / previous) * 100;
+}
+
+function formatPercentChange(value) {
+  if (value === null || !Number.isFinite(value)) return "n/d";
+  const prefix = value > 0 ? "+" : "";
+  return `${prefix}${formatDecimal(value)}%`;
+}
+
+function getComparisonItems(comparison) {
+  if (!comparison?.current || !comparison?.previous) return [];
+  const current = comparison.current;
+  const previous = comparison.previous;
+  const currentCpc = current.clicks > 0 ? current.spend / current.clicks : 0;
+  const previousCpc = previous.clicks > 0 ? previous.spend / previous.clicks : 0;
+
+  return [
+    {
+      label: "Copertura",
+      value: formatPercentChange(getPercentChange(current.reach, previous.reach)),
+      note: `${formatNumber(current.reach)} vs ${formatNumber(previous.reach)}`,
+    },
+    {
+      label: "Click",
+      value: formatPercentChange(getPercentChange(current.clicks, previous.clicks)),
+      note: `${formatNumber(current.clicks)} vs ${formatNumber(previous.clicks)}`,
+    },
+    {
+      label: "Visualizzazioni sito",
+      value: formatPercentChange(getPercentChange(current.leads, previous.leads)),
+      note: `${formatNumber(current.leads)} vs ${formatNumber(previous.leads)}`,
+    },
+    {
+      label: "CPC medio",
+      value: formatPercentChange(getPercentChange(currentCpc, previousCpc)),
+      note: `${formatCurrency(currentCpc)} vs ${formatCurrency(previousCpc)}`,
+      inverse: true,
+    },
+  ];
+}
+
+function renderComparison(comparison) {
+  const items = getComparisonItems(comparison);
+
+  if (items.length === 0) {
+    return `
+      <div class="ai-compare">
+        <div class="ai-compare-heading">
+          <span>Confronto storico</span>
+          <strong>Anno precedente non disponibile</strong>
+        </div>
+        <p class="ai-compare-empty">Non ci sono dati sufficienti per confrontare questo periodo con lo stesso intervallo dell'anno precedente.</p>
+      </div>
+    `;
   }
 
-  .score-panel {
-    position: static;
+  return `
+    <div class="ai-compare">
+      <div class="ai-compare-heading">
+        <span>Confronto storico</span>
+        <strong>${formatDate(comparison.date_start)} - ${formatDate(comparison.date_stop)}</strong>
+      </div>
+      <div class="ai-compare-grid">
+        ${items
+          .map((item) => {
+            const rawValue = item.value === "n/d" ? 0 : Number(item.value.replace("%", "").replace("+", "").replace(",", "."));
+            const isPositive = item.value !== "n/d" && (item.inverse ? rawValue < 0 : rawValue > 0);
+            return `
+              <article class="ai-compare-item ${isPositive ? "is-positive" : ""}">
+                <span>${escapeHtml(item.label)}</span>
+                <strong>${escapeHtml(item.value)}</strong>
+                <small>${escapeHtml(item.note)}</small>
+              </article>
+            `;
+          })
+          .join("")}
+      </div>
+    </div>
+  `;
+}
+
+function renderAiInsights(totals, report) {
+  const campaigns = report.campaigns
+    .filter((campaign) => campaign.spend > 0 || campaign.impressions > 0 || campaign.clicks > 0)
+    .map(getCampaignEfficiency);
+
+  if (campaigns.length === 0) {
+    aiInsights.innerHTML = `
+      <div class="ai-summary">
+        <span>Dati insufficienti</span>
+        <strong>Analisi non disponibile</strong>
+        <p>Nel periodo selezionato non ci sono dati Meta sufficienti per generare suggerimenti attendibili.</p>
+      </div>
+    `;
+    return;
+  }
+
+  const bestCtr = pickBestCampaign(campaigns, "ctr");
+  const bestCpc = pickBestCampaign(campaigns, "cpc", "min");
+  const bestContentCost = pickBestCampaign(campaigns, "contentCost", "min");
+  const bestEngagement = pickBestCampaign(campaigns, "engagementRate");
+  const weakCtr = pickBestCampaign(campaigns, "ctr", "min");
+  const budgetReference = bestContentCost || bestCpc || bestCtr || campaigns[0];
+  const engagementText = bestEngagement
+    ? `${bestEngagement.name} ha il miglior tasso di interazione (${formatDecimal(bestEngagement.engagementRate)}%).`
+    : "Le interazioni risultano distribuite in modo simile tra le campagne.";
+  const optimizationText =
+    weakCtr && weakCtr.ctr > 0
+      ? `${weakCtr.name} ha il CTR piu basso (${formatDecimal(weakCtr.ctr)}%): puo valere un test su creativita, messaggio o call to action.`
+      : "Non emergono campagne con criticita evidenti sul CTR nel periodo selezionato.";
+  const budgetText = budgetReference
+    ? `Valutare una quota aggiuntiva del 10-15% su ${budgetReference.name}, monitorando costo medio e visualizzazioni sito nei giorni successivi.`
+    : "Mantenere il budget attuale e rivalutare dopo nuovi dati.";
+
+  const cards = [
+    {
+      label: "Cosa sta funzionando",
+      title: bestCtr
+        ? `${bestCtr.name} genera il CTR migliore (${formatDecimal(bestCtr.ctr)}%).`
+        : "Le campagne hanno performance equilibrate.",
+      text: engagementText,
+    },
+    {
+      label: "Dove ottimizzare",
+      title: bestCpc
+        ? `CPC migliore su ${bestCpc.name}: ${formatCurrency(bestCpc.cpc)}.`
+        : "Costo per click non ancora significativo.",
+      text: optimizationText,
+    },
+    {
+      label: "Possibile allocazione budget",
+      title:
+        totals.spend > 0
+          ? `Budget analizzato: ${formatCurrency(totals.spend)} nel periodo.`
+          : "Budget non disponibile nel periodo.",
+      text: budgetText,
+    },
+  ];
+
+  const mainCampaign = bestCtr || bestEngagement || budgetReference;
+  const mainMetric = mainCampaign
+    ? `${formatDecimal(mainCampaign.ctr)}% CTR`
+    : `${formatCurrency(totals.spend)} budget`;
+  const allocation = getBudgetAllocation(campaigns);
+  const pieGradient = allocation.length > 0 ? getPieGradient(allocation) : "conic-gradient(#c8ff63 0 100%)";
+
+  aiInsights.innerHTML = `
+    <div class="ai-summary">
+      <span>Lettura previsionale</span>
+      <strong>${escapeHtml(mainCampaign ? mainCampaign.name : "Periodo selezionato")}</strong>
+      <p>${escapeHtml(
+        mainCampaign
+          ? `La campagna mostra il segnale piu interessante nel periodo, con ${mainMetric} e un costo medio per click di ${formatCurrency(mainCampaign.cpc)}.`
+          : "Le campagne hanno performance distribuite in modo equilibrato nel periodo selezionato."
+      )}</p>
+      <div class="ai-pie-block" aria-label="Allocazione budget suggerita">
+        <div class="ai-pie" style="background: ${pieGradient}">
+          <strong>${escapeHtml(allocation[0] ? `${allocation[0].percentage}%` : "-")}</strong>
+          <small>quota top</small>
+        </div>
+        <div class="ai-legend">
+          ${allocation
+            .map(
+              (item) => `
+                <div>
+                  <i style="background: ${item.color}"></i>
+                  <span>${escapeHtml(item.name)}</span>
+                  <strong>${formatNumber(item.percentage)}%</strong>
+                </div>
+              `
+            )
+            .join("")}
+        </div>
+      </div>
+      ${renderComparison(report.comparison)}
+    </div>
+    <div class="ai-actions">
+      ${cards
+        .map(
+          (card) => `
+            <article class="ai-action">
+              <span>${escapeHtml(card.label)}</span>
+              <strong>${escapeHtml(card.title)}</strong>
+              <p>${escapeHtml(card.text)}</p>
+            </article>
+          `
+        )
+        .join("")}
+    </div>
+  `;
+}
+
+function renderChart(report) {
+  const days = aggregateDaily(report);
+  const max = Math.max(...days.map((day) => day[activeChartMetric]), 1);
+
+  barChart.innerHTML = days
+    .map((day) => {
+      const value = day[activeChartMetric];
+      const formattedValue =
+        activeChartMetric === "spend" ? formatCurrency(value) : formatNumber(value);
+      const height = Math.max(4, (value / max) * 100);
+      const date = new Date(`${day.date}T00:00:00`);
+      const label = new Intl.DateTimeFormat("it-IT", { day: "2-digit", month: "2-digit" }).format(date);
+
+      return `
+        <div class="bar" title="${escapeHtml(`${label} - ${formattedValue}`)}">
+          <div class="bar-fill" style="height: ${height}%"></div>
+          <span class="bar-value">${escapeHtml(formattedValue)}</span>
+          <small>${label}</small>
+        </div>
+      `;
+    })
+    .join("");
+}
+
+function renderFollowerChart(report) {
+  const days = aggregateDaily(report, 31);
+  const max = Math.max(
+    ...days.map((day) => Math.max(day.followersGained, day.followersLost)),
+    1
+  );
+
+  followerChart.style.setProperty("--follower-columns", days.length || 1);
+  followerChart.innerHTML = days
+    .map((day) => {
+      const gainedHeight = Math.max(4, (day.followersGained / max) * 100);
+      const lostHeight = Math.max(4, (day.followersLost / max) * 100);
+      const net = day.followersGained - day.followersLost;
+      const date = new Date(`${day.date}T00:00:00`);
+      const label = new Intl.DateTimeFormat("it-IT", {
+        day: "2-digit",
+        month: "2-digit",
+      }).format(date);
+
+      return `
+        <div class="follower-day" title="+${formatNumber(day.followersGained)} / -${formatNumber(day.followersLost)} follower">
+          <span class="follower-value is-gain">+${formatNumber(day.followersGained)}</span>
+          <div class="follower-bars">
+            <div class="follower-bar is-gain" style="height: ${gainedHeight}%"></div>
+            <div class="follower-baseline"></div>
+            <div class="follower-bar is-loss" style="height: ${lostHeight}%"></div>
+          </div>
+          <span class="follower-value is-net">${net >= 0 ? "+" : ""}${formatNumber(net)}</span>
+          <small>${label}</small>
+        </div>
+      `;
+    })
+    .join("");
+}
+
+function renderDashboard(mode = "demo", detail = "") {
+  const totals = getTotals(currentReport);
+  const active = currentReport.campaigns.filter((campaign) => campaign.status === "ACTIVE").length;
+
+  clientTitle.textContent = currentClient.name;
+  clientDescription.textContent = currentClient.description;
+  accessClient.textContent = currentClient.name;
+  clientInitials.textContent = initials(currentClient.name);
+  updatedAt.textContent = formatDateTime(currentReport.updatedAt);
+  activeCampaigns.textContent = active;
+  metaAccount.textContent = currentClient.metaAccount;
+  selectedRange.textContent =
+    getSelectedRange().from === getSelectedRange().to
+      ? formatDate(getSelectedRange().from)
+      : `${formatDate(getSelectedRange().from)} - ${formatDate(getSelectedRange().to)}`;
+
+  renderStatus(mode, detail);
+  renderMetrics(totals);
+  renderEngagement(totals, currentReport);
+  renderAiInsights(totals, currentReport);
+  renderCampaigns(currentReport);
+  renderChart(currentReport);
+  renderFollowerChart(currentReport);
+}
+
+function randomInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function randomFloat(min, max, digits = 2) {
+  return Number((Math.random() * (max - min) + min).toFixed(digits));
+}
+
+function seededRatio(seed) {
+  let hash = 0;
+
+  for (let index = 0; index < seed.length; index += 1) {
+    hash = (hash << 5) - hash + seed.charCodeAt(index);
+    hash |= 0;
+  }
+
+  const value = Math.sin(Math.abs(hash)) * 10000;
+  return value - Math.floor(value);
+}
+
+function seededFloat(seed, min, max, digits = 2) {
+  return Number((seededRatio(seed) * (max - min) + min).toFixed(digits));
+}
+
+function listDates(from, to) {
+  const dates = [];
+  const start = new Date(`${from}T00:00:00`);
+  const end = new Date(`${to || from}T00:00:00`);
+
+  for (let date = new Date(start); date <= end; date.setDate(date.getDate() + 1)) {
+    dates.push(isoDate(date));
+  }
+
+  return dates;
+}
+
+function buildRandomDailySeries(campaign, range) {
+  const safeRange = {
+    from: range.from || mockDateRange.from,
+    to: range.to || range.from || mockDateRange.to,
+  };
+  const dates = listDates(safeRange.from, safeRange.to);
+  const baseClicks = Math.max(18, Math.round((campaign.clicks || 800) / 18));
+  const baseSpend = Math.max(7, (campaign.spend || 300) / 18);
+
+  return dates.map((date, index) => {
+    const seed = `${campaign.id}-${date}`;
+    const month = new Date(`${date}T00:00:00`).getMonth() + 1;
+    const monthBoost = month === 4 ? 0.82 : month === 5 ? 1 : month === 6 ? 1.18 : 0.9;
+    const weekendBoost = [5, 6].includes(new Date(`${date}T00:00:00`).getDay()) ? 1.25 : 1;
+    const trendBoost = 1 + index * 0.004;
+    const clicks = Math.max(
+      8,
+      Math.round(
+        baseClicks *
+          seededFloat(`${seed}-clicks`, 0.65, 1.45) *
+          monthBoost *
+          weekendBoost *
+          trendBoost
+      )
+    );
+    const cpc = seededFloat(`${seed}-cpc`, 0.18, 0.74);
+    const spend = Number((clicks * cpc).toFixed(2));
+    const impressions = Math.round(clicks * seededFloat(`${seed}-impressions`, 34, 78));
+    const reach = Math.round(impressions * seededFloat(`${seed}-reach`, 0.45, 0.78));
+    const likes = Math.round(clicks * seededFloat(`${seed}-likes`, 0.22, 0.58));
+    const comments = Math.max(0, Math.round(likes * seededFloat(`${seed}-comments`, 0.04, 0.16)));
+    const shares = Math.max(0, Math.round(likes * seededFloat(`${seed}-shares`, 0.03, 0.13)));
+    const leads = Math.max(0, Math.round(clicks * seededFloat(`${seed}-leads`, 0.035, 0.105)));
+    const followersGained = Math.max(
+      1,
+      Math.round(
+        leads * seededFloat(`${seed}-followers-leads`, 0.25, 0.62) +
+          likes * seededFloat(`${seed}-followers-likes`, 0.018, 0.07)
+      )
+    );
+    const followersLost = Math.max(
+      0,
+      Math.round(
+        followersGained * seededFloat(`${seed}-followers-lost`, 0.12, 0.48) +
+          clicks * seededFloat(`${seed}-followers-clicks`, 0.001, 0.009)
+      )
+    );
+    const purchases =
+      campaign.purchases > 0
+        ? Math.max(0, Math.round(leads * seededFloat(`${seed}-purchases`, 0.08, 0.28)))
+        : 0;
+    const revenue =
+      purchases > 0
+        ? Number((purchases * seededFloat(`${seed}-revenue`, 55, 210)).toFixed(2))
+        : 0;
+
+    return {
+      date,
+      spend: Math.max(spend, seededFloat(`${seed}-spend`, baseSpend * 0.45, baseSpend * 0.75)),
+      impressions,
+      reach,
+      clicks,
+      likes,
+      comments,
+      shares,
+      followersGained,
+      followersLost,
+      leads,
+      purchases,
+      revenue,
+    };
+  });
+}
+
+function summarizeRandomCampaign(campaign, range) {
+  const daily = buildRandomDailySeries(campaign, range);
+  const totals = daily.reduce(
+    (acc, day) => {
+      acc.spend += day.spend;
+      acc.impressions += day.impressions;
+      acc.reach += day.reach;
+      acc.clicks += day.clicks;
+      acc.likes += day.likes;
+      acc.comments += day.comments;
+      acc.shares += day.shares;
+      acc.followersGained += day.followersGained;
+      acc.followersLost += day.followersLost;
+      acc.leads += day.leads;
+      acc.purchases += day.purchases;
+      acc.revenue += day.revenue;
+      return acc;
+    },
+    {
+      spend: 0,
+      impressions: 0,
+      reach: 0,
+      clicks: 0,
+      likes: 0,
+      comments: 0,
+      shares: 0,
+      followersGained: 0,
+      followersLost: 0,
+      leads: 0,
+      purchases: 0,
+      revenue: 0,
+    }
+  );
+
+  return {
+    ...campaign,
+    ...totals,
+    spend: Number(totals.spend.toFixed(2)),
+    revenue: Number(totals.revenue.toFixed(2)),
+    daily,
+  };
+}
+
+function buildRandomMockReport(clientId, range) {
+  const fallback = fallbackReports[clientId] || fallbackReports[clients[0].id];
+
+  return {
+    ...fallback,
+    clientId,
+    mode: "mock",
+    date_start: range.from,
+    date_stop: range.to,
+    updatedAt: new Date().toISOString(),
+    campaigns: fallback.campaigns.map((campaign) => summarizeRandomCampaign(campaign, range)),
+  };
+}
+
+function buildUnavailableReport(clientId, range, previousReport = null) {
+  const previousCampaigns =
+    previousReport?.availableCampaigns?.length > 0
+      ? previousReport.availableCampaigns
+      : previousReport?.campaigns || [];
+
+  return {
+    clientId,
+    mode: "error",
+    date_start: range.from,
+    date_stop: range.to,
+    updatedAt: new Date().toISOString(),
+    availableCampaigns: previousCampaigns,
+    campaigns: [],
+  };
+}
+
+function mockMetaInsightsRequest(clientId, range) {
+  return new Promise((resolve) => {
+    window.setTimeout(() => {
+      resolve(buildRandomMockReport(clientId, range));
+    }, 260);
+  });
+}
+
+async function loadReport() {
+  const fallback = fallbackReports[currentClient.id];
+  const range = getEndpointRange();
+  if (!isManualRange) {
+    dateFrom.value = range.from;
+    dateTo.value = range.to;
+  }
+  const endpoint = `${currentClient.endpoint}?client=${encodeURIComponent(
+    currentClient.id
+  )}&period=${encodeURIComponent(isManualRange ? "custom" : periodSelect.value)}&date_start=${encodeURIComponent(
+    range.from
+  )}&date_stop=${encodeURIComponent(range.to)}`;
+
+  if (useMockMetaApi) {
+    const payload = await mockMetaInsightsRequest(currentClient.id, range);
+    currentFullReport = normalizeReport(payload, fallback);
+    syncDateInputsFromPeriod(currentFullReport);
+    renderCampaignOptions(currentFullReport);
+    currentReport = getFilteredReport(currentFullReport);
+    renderDashboard("mock", "Report aggiornato.");
+    return;
+  }
+
+  try {
+    const response = await fetch(endpoint, {
+      credentials: "same-origin",
+      headers: { Accept: "application/json" },
+    });
+    const payload = await response.json();
+    const hasCampaignData = Array.isArray(payload.campaigns) && payload.campaigns.length > 0;
+    const hasCampaignOptions =
+      Array.isArray(payload.availableCampaigns) && payload.availableCampaigns.length > 0;
+
+    if (!response.ok) {
+      throw new Error(payload.message || `Meta API HTTP ${response.status}`);
+    }
+
+    if (!hasCampaignData && !hasCampaignOptions) {
+      throw new Error("Meta ha risposto, ma non ci sono campagne nel periodo selezionato.");
+    }
+
+    currentFullReport = normalizeReport(payload, fallback);
+    syncDateInputsFromPeriod(currentFullReport);
+    renderCampaignOptions(currentFullReport);
+    currentReport = getFilteredReport(currentFullReport);
+    renderDashboard("live", "Report aggiornato.");
+  } catch (error) {
+    const unavailablePayload = buildUnavailableReport(currentClient.id, range, currentFullReport);
+    currentFullReport = normalizeReport(unavailablePayload, fallback);
+    syncDateInputsFromPeriod(currentFullReport);
+    renderCampaignOptions(currentFullReport);
+    currentReport = getFilteredReport(currentFullReport);
+    console.warn("Meta Insights non disponibili.", error);
+    renderDashboard("error", "Dati momentaneamente non disponibili.");
   }
 }
 
-@media (max-width: 820px) {
-  .workspace {
-    padding: 16px;
-  }
-
-  .topbar,
-  .date-query-panel,
-  .client-panel,
-  .panel {
-    padding: 18px;
-  }
-
-  h1 {
-    font-size: 2.15rem;
-    white-space: normal;
-  }
-
-  .topbar p:not(.eyebrow),
-  .date-query-panel p:not(.eyebrow) {
-    margin-top: 8px;
-  }
-
-  .top-actions {
-    padding: 12px;
-    gap: 8px;
-  }
-
-  input,
-  select,
-  button {
-    min-height: 40px;
-  }
-
-  .top-actions,
-  .date-controls,
-  .status-strip,
-  .metric-grid,
-  .engagement-grid,
-  .ai-advisor,
-  .sidebar nav {
-    grid-template-columns: 1fr;
-  }
-
-  .panel-heading.split {
-    display: grid;
-  }
-
-  .ai-pie-block {
-    grid-template-columns: 1fr;
-    justify-items: start;
-  }
-
-  .ai-compare-heading {
-    display: grid;
-  }
-
-  .ai-compare-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .bar-chart {
-    grid-template-columns: repeat(7, minmax(26px, 1fr));
-    overflow-x: auto;
-  }
-
-  .follower-chart {
-    grid-template-columns: repeat(var(--follower-columns), minmax(42px, 1fr));
-  }
+function initializeReport() {
+  currentClient = clients[0];
+  fixedClientName.textContent = currentClient.name;
+  selectedCampaignId = "all";
+  currentFullReport = normalizeReport(fallbackReports[currentClient.id], fallbackReports[currentClient.id]);
+  syncDateInputsFromPeriod(currentFullReport);
+  renderCampaignOptions(currentFullReport);
+  currentReport = getFilteredReport(currentFullReport);
+  loadReport();
 }
+
+function getEndpointRange() {
+  const fallback = fallbackReports[currentClient.id];
+  const referenceReport = currentFullReport || normalizeReport(fallback, fallback);
+
+  if (!isManualRange) {
+    return getQuickRange(referenceReport, periodSelect.value);
+  }
+
+  return getSelectedRange();
+}
+
+function exportCurrentCsv() {
+  const rows = [
+    [
+      "campagna",
+      "obiettivo",
+      "stato",
+      "spesa",
+      "impression",
+      "copertura",
+      "click",
+      "interazioni con la pagina",
+      "commenti",
+      "condivisioni",
+      "visualizzazioni contenuti sul sito web",
+    ],
+    ...currentReport.campaigns.map((campaign) => [
+      campaign.name,
+      campaign.objective,
+      campaign.status,
+      campaign.spend,
+      campaign.impressions,
+      campaign.reach,
+      campaign.clicks,
+      campaign.likes,
+      campaign.comments,
+      campaign.shares,
+      campaign.leads,
+    ]),
+  ];
+
+  const csv = rows
+    .map((row) => row.map((cell) => `"${String(cell).replaceAll('"', '""')}"`).join(","))
+    .join("\n");
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  const campaignSlug = selectedCampaignId === "all" ? "tutte-campagne" : selectedCampaignId;
+  const periodSlug = isManualRange ? "periodo-personalizzato" : periodSelect.value;
+  link.download = `report-social-${currentClient.id}-${campaignSlug}-${periodSlug}.csv`;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+initializeReport();
+
+campaignSelect.addEventListener("change", () => {
+  selectedCampaignId = campaignSelect.value;
+  const selectedCampaign = (currentFullReport.availableCampaigns || currentFullReport.campaigns).find(
+    (campaign) => campaign.id === selectedCampaignId
+  );
+  const campaignRange = getCampaignMonthRange(selectedCampaign);
+
+  if (campaignRange) {
+    isManualRange = true;
+    dateFrom.value = campaignRange.from;
+    dateTo.value = campaignRange.to;
+    loadReport();
+    return;
+  }
+
+  currentReport = getFilteredReport(currentFullReport);
+  renderDashboard(currentConnectionMode);
+});
+periodSelect.addEventListener("change", () => {
+  isManualRange = false;
+  loadReport();
+});
+refreshData.addEventListener("click", loadReport);
+applyDateFilter.addEventListener("click", () => {
+  isManualRange = true;
+  loadReport();
+});
+exportCsv.addEventListener("click", exportCurrentCsv);
+
+chartButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    activeChartMetric = button.dataset.chartMetric;
+    chartButtons.forEach((item) => item.classList.toggle("is-active", item === button));
+    renderChart(currentReport);
+  });
+});
