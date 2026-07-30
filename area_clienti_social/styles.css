@@ -310,6 +310,13 @@ button {
   font-weight: 800;
 }
 
+button:disabled,
+input:disabled,
+select:disabled {
+  opacity: 0.66;
+  cursor: wait;
+}
+
 .primary-button {
   color: #07111f;
   background: linear-gradient(135deg, var(--lime), #7dd3fc);
