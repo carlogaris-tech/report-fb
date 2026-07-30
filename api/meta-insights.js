@@ -16,12 +16,6 @@ function firstValue(value) {
   return Array.isArray(value) ? value[0] : value;
 }
 
-function cleanCampaignId(value) {
-  const campaignId = firstValue(value);
-  if (!campaignId || campaignId === "all") return "";
-  return String(campaignId).replace(/[^\d]/g, "");
-}
-
 function shiftYear(value, amount) {
   const [year, month, day] = value.split("-").map(Number);
   const shifted = new Date(Date.UTC(year + amount, month - 1, day));
@@ -33,6 +27,22 @@ function getPreviousYearRange(from, to) {
     from: shiftYear(from, -1),
     to: shiftYear(to, -1),
   };
+}
+
+function buildInsightParams(token, from, to, level = "") {
+  const params = new URLSearchParams({
+    access_token: token,
+    time_range: JSON.stringify({ since: from, until: to }),
+    fields:
+      "campaign_id,campaign_name,objective,spend,impressions,reach,clicks,inline_link_clicks,actions,action_values,date_start,date_stop",
+    limit: "500",
+  });
+
+  if (level) {
+    params.set("level", level);
+  }
+
+  return params;
 }
 
 function parseActions(actions = [], actionValues = []) {
@@ -112,16 +122,20 @@ function parseInsightTotals(row = {}) {
   };
 }
 
-async function fetchAccountTotals(baseUrl, token, from, to) {
+async function fetchInsightTotals(insightsBaseUrl, token, from, to, level = "") {
   const params = new URLSearchParams({
     access_token: token,
-    level: "account",
     time_range: JSON.stringify({ since: from, until: to }),
     fields:
       "spend,impressions,reach,clicks,inline_link_clicks,actions,action_values,date_start,date_stop",
     limit: "1",
   });
-  const payload = await fetchMetaJson(`${baseUrl}/insights?${params}`);
+
+  if (level) {
+    params.set("level", level);
+  }
+
+  const payload = await fetchMetaJson(`${insightsBaseUrl}/insights?${params}`);
   return parseInsightTotals(payload.data?.[0] || {});
 }
 
@@ -131,6 +145,8 @@ function createCampaign(campaignId, row = {}, campaignMeta = null) {
     name: row.campaign_name || campaignMeta?.name || "Campagna senza nome",
     status: campaignMeta?.effective_status || campaignMeta?.status || "ACTIVE",
     objective: campaignMeta?.objective || row.objective || "-",
+    created_time: campaignMeta?.created_time || "",
+    updated_time: campaignMeta?.updated_time || "",
     spend: 0,
     impressions: 0,
     reach: 0,
@@ -145,8 +161,8 @@ function createCampaign(campaignId, row = {}, campaignMeta = null) {
   };
 }
 
-function addDailyToCampaign(campaigns, row, campaignMeta) {
-  const campaignId = row.campaign_id || row.campaign_name || "unknown";
+function addDailyToCampaign(campaigns, row, campaignMeta, fallbackCampaignId = "") {
+  const campaignId = row.campaign_id || campaignMeta?.id || fallbackCampaignId || row.campaign_name || "unknown";
   const actionTotals = parseActions(row.actions, row.action_values);
   const current = campaigns.get(campaignId) || createCampaign(campaignId, row, campaignMeta);
 
@@ -178,8 +194,8 @@ function addDailyToCampaign(campaigns, row, campaignMeta) {
   campaigns.set(campaignId, current);
 }
 
-function applyPeriodTotalsToCampaign(campaigns, row, campaignMeta) {
-  const campaignId = row.campaign_id || row.campaign_name || "unknown";
+function applyPeriodTotalsToCampaign(campaigns, row, campaignMeta, fallbackCampaignId = "") {
+  const campaignId = row.campaign_id || campaignMeta?.id || fallbackCampaignId || row.campaign_name || "unknown";
   const actionTotals = parseActions(row.actions, row.action_values);
   const current = campaigns.get(campaignId) || createCampaign(campaignId, row, campaignMeta);
 
@@ -217,7 +233,6 @@ export default async function handler(request, response) {
   const apiVersion = process.env.META_API_VERSION || DEFAULT_API_VERSION;
   const from = firstValue(request.query.date_start) || firstValue(request.query.from);
   const to = firstValue(request.query.date_stop) || firstValue(request.query.to) || from;
-  const campaignId = cleanCampaignId(request.query.campaign_id || request.query.campaign);
 
   if (!token || !adAccountId || !from || !to) {
     sendJson(response, 500, {
@@ -236,35 +251,9 @@ export default async function handler(request, response) {
       fields: "id,name,status,effective_status,objective",
       limit: "500",
     })}`;
-    const insightsParams = new URLSearchParams({
-      access_token: token,
-      level: "campaign",
-      time_increment: "1",
-      time_range: JSON.stringify({ since: from, until: to }),
-      fields:
-        "campaign_id,campaign_name,objective,spend,impressions,reach,clicks,inline_link_clicks,actions,action_values,date_start,date_stop",
-      limit: "500",
-    });
-    const totalInsightsParams = new URLSearchParams({
-      access_token: token,
-      level: "campaign",
-      time_range: JSON.stringify({ since: from, until: to }),
-      fields:
-        "campaign_id,campaign_name,objective,spend,impressions,reach,clicks,inline_link_clicks,actions,action_values,date_start,date_stop",
-      limit: "500",
-    });
-
-    if (campaignId) {
-      const campaignFilter = JSON.stringify([
-        {
-          field: "campaign.id",
-          operator: "IN",
-          value: [campaignId],
-        },
-      ]);
-      insightsParams.set("filtering", campaignFilter);
-      totalInsightsParams.set("filtering", campaignFilter);
-    }
+    const insightsParams = buildInsightParams(token, from, to, "campaign");
+    insightsParams.set("time_increment", "1");
+    const totalInsightsParams = buildInsightParams(token, from, to, "campaign");
 
     const [campaignPayload, insightsPayload, totalInsightsPayload] = await Promise.all([
       fetchMetaJson(campaignUrl),
@@ -274,6 +263,7 @@ export default async function handler(request, response) {
     const campaignMeta = new Map(
       (campaignPayload.data || []).map((campaign) => [campaign.id, campaign])
     );
+
     const campaigns = new Map();
 
     (insightsPayload.data || []).forEach((row) => {
@@ -289,8 +279,14 @@ export default async function handler(request, response) {
 
     try {
       const [currentTotals, previousTotals] = await Promise.all([
-        fetchAccountTotals(baseUrl, token, from, to),
-        fetchAccountTotals(baseUrl, token, previousRange.from, previousRange.to),
+        fetchInsightTotals(baseUrl, token, from, to, "account"),
+        fetchInsightTotals(
+          baseUrl,
+          token,
+          previousRange.from,
+          previousRange.to,
+          "account"
+        ),
       ]);
 
       comparison = {
