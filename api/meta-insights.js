@@ -3,7 +3,7 @@ const DEFAULT_API_VERSION = "v25.0";
 function sendJson(response, statusCode, payload) {
   response.statusCode = statusCode;
   response.setHeader("Content-Type", "application/json; charset=utf-8");
-  response.setHeader("Cache-Control", "s-maxage=900, stale-while-revalidate=1800");
+  response.setHeader("Cache-Control", "no-store");
   response.end(JSON.stringify(payload));
 }
 
@@ -14,6 +14,12 @@ function cleanAdAccountId(value) {
 
 function firstValue(value) {
   return Array.isArray(value) ? value[0] : value;
+}
+
+function cleanCampaignId(value) {
+  const campaignId = firstValue(value);
+  if (!campaignId || campaignId === "all") return "";
+  return String(campaignId).replace(/[^\d]/g, "");
 }
 
 function shiftYear(value, amount) {
@@ -211,6 +217,7 @@ export default async function handler(request, response) {
   const apiVersion = process.env.META_API_VERSION || DEFAULT_API_VERSION;
   const from = firstValue(request.query.date_start) || firstValue(request.query.from);
   const to = firstValue(request.query.date_stop) || firstValue(request.query.to) || from;
+  const campaignId = cleanCampaignId(request.query.campaign_id || request.query.campaign);
 
   if (!token || !adAccountId || !from || !to) {
     sendJson(response, 500, {
@@ -229,10 +236,6 @@ export default async function handler(request, response) {
       fields: "id,name,status,effective_status,objective",
       limit: "500",
     })}`;
-    const campaignPayload = await fetchMetaJson(campaignUrl);
-    const campaignMeta = new Map(
-      (campaignPayload.data || []).map((campaign) => [campaign.id, campaign])
-    );
     const insightsParams = new URLSearchParams({
       access_token: token,
       level: "campaign",
@@ -242,7 +245,6 @@ export default async function handler(request, response) {
         "campaign_id,campaign_name,objective,spend,impressions,reach,clicks,inline_link_clicks,actions,action_values,date_start,date_stop",
       limit: "500",
     });
-    const insightsPayload = await fetchMetaJson(`${baseUrl}/insights?${insightsParams}`);
     const totalInsightsParams = new URLSearchParams({
       access_token: token,
       level: "campaign",
@@ -251,7 +253,27 @@ export default async function handler(request, response) {
         "campaign_id,campaign_name,objective,spend,impressions,reach,clicks,inline_link_clicks,actions,action_values,date_start,date_stop",
       limit: "500",
     });
-    const totalInsightsPayload = await fetchMetaJson(`${baseUrl}/insights?${totalInsightsParams}`);
+
+    if (campaignId) {
+      const campaignFilter = JSON.stringify([
+        {
+          field: "campaign.id",
+          operator: "IN",
+          value: [campaignId],
+        },
+      ]);
+      insightsParams.set("filtering", campaignFilter);
+      totalInsightsParams.set("filtering", campaignFilter);
+    }
+
+    const [campaignPayload, insightsPayload, totalInsightsPayload] = await Promise.all([
+      fetchMetaJson(campaignUrl),
+      fetchMetaJson(`${baseUrl}/insights?${insightsParams}`),
+      fetchMetaJson(`${baseUrl}/insights?${totalInsightsParams}`).catch(() => ({ data: [] })),
+    ]);
+    const campaignMeta = new Map(
+      (campaignPayload.data || []).map((campaign) => [campaign.id, campaign])
+    );
     const campaigns = new Map();
 
     (insightsPayload.data || []).forEach((row) => {
