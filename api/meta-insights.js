@@ -16,6 +16,19 @@ function firstValue(value) {
   return Array.isArray(value) ? value[0] : value;
 }
 
+function shiftYear(value, amount) {
+  const [year, month, day] = value.split("-").map(Number);
+  const shifted = new Date(Date.UTC(year + amount, month - 1, day));
+  return shifted.toISOString().slice(0, 10);
+}
+
+function getPreviousYearRange(from, to) {
+  return {
+    from: shiftYear(from, -1),
+    to: shiftYear(to, -1),
+  };
+}
+
 function parseActions(actions = [], actionValues = []) {
   const totals = {
     likes: 0,
@@ -61,28 +74,75 @@ function parseActions(actions = [], actionValues = []) {
   return totals;
 }
 
+function emptyTotals() {
+  return {
+    spend: 0,
+    impressions: 0,
+    reach: 0,
+    clicks: 0,
+    likes: 0,
+    comments: 0,
+    shares: 0,
+    leads: 0,
+    purchases: 0,
+    revenue: 0,
+  };
+}
+
+function parseInsightTotals(row = {}) {
+  const actionTotals = parseActions(row.actions, row.action_values);
+
+  return {
+    spend: Number(row.spend) || 0,
+    impressions: Number(row.impressions) || 0,
+    reach: Number(row.reach) || 0,
+    clicks: Number(row.clicks || row.inline_link_clicks) || 0,
+    likes: actionTotals.likes,
+    comments: actionTotals.comments,
+    shares: actionTotals.shares,
+    leads: actionTotals.leads,
+    purchases: actionTotals.purchases,
+    revenue: actionTotals.revenue,
+  };
+}
+
+async function fetchAccountTotals(baseUrl, token, from, to) {
+  const params = new URLSearchParams({
+    access_token: token,
+    level: "account",
+    time_range: JSON.stringify({ since: from, until: to }),
+    fields:
+      "spend,impressions,reach,clicks,inline_link_clicks,actions,action_values,date_start,date_stop",
+    limit: "1",
+  });
+  const payload = await fetchMetaJson(`${baseUrl}/insights?${params}`);
+  return parseInsightTotals(payload.data?.[0] || {});
+}
+
+function createCampaign(campaignId, row = {}, campaignMeta = null) {
+  return {
+    id: campaignId,
+    name: row.campaign_name || campaignMeta?.name || "Campagna senza nome",
+    status: campaignMeta?.effective_status || campaignMeta?.status || "ACTIVE",
+    objective: campaignMeta?.objective || row.objective || "-",
+    spend: 0,
+    impressions: 0,
+    reach: 0,
+    clicks: 0,
+    likes: 0,
+    comments: 0,
+    shares: 0,
+    leads: 0,
+    purchases: 0,
+    revenue: 0,
+    daily: [],
+  };
+}
+
 function addDailyToCampaign(campaigns, row, campaignMeta) {
   const campaignId = row.campaign_id || row.campaign_name || "unknown";
   const actionTotals = parseActions(row.actions, row.action_values);
-  const current =
-    campaigns.get(campaignId) ||
-    {
-      id: campaignId,
-      name: row.campaign_name || campaignMeta?.name || "Campagna senza nome",
-      status: campaignMeta?.effective_status || campaignMeta?.status || "ACTIVE",
-      objective: campaignMeta?.objective || row.objective || "-",
-      spend: 0,
-      impressions: 0,
-      reach: 0,
-      clicks: 0,
-      likes: 0,
-      comments: 0,
-      shares: 0,
-      leads: 0,
-      purchases: 0,
-      revenue: 0,
-      daily: [],
-    };
+  const current = campaigns.get(campaignId) || createCampaign(campaignId, row, campaignMeta);
 
   const day = {
     date: row.date_start,
@@ -109,6 +169,27 @@ function addDailyToCampaign(campaigns, row, campaignMeta) {
   current.purchases += day.purchases;
   current.revenue += day.revenue;
   current.daily.push(day);
+  campaigns.set(campaignId, current);
+}
+
+function applyPeriodTotalsToCampaign(campaigns, row, campaignMeta) {
+  const campaignId = row.campaign_id || row.campaign_name || "unknown";
+  const actionTotals = parseActions(row.actions, row.action_values);
+  const current = campaigns.get(campaignId) || createCampaign(campaignId, row, campaignMeta);
+
+  current.name = row.campaign_name || current.name;
+  current.objective = campaignMeta?.objective || row.objective || current.objective;
+  current.status = campaignMeta?.effective_status || campaignMeta?.status || current.status;
+  current.spend = Number(row.spend) || 0;
+  current.impressions = Number(row.impressions) || 0;
+  current.reach = Number(row.reach) || 0;
+  current.clicks = Number(row.clicks || row.inline_link_clicks) || 0;
+  current.likes = actionTotals.likes;
+  current.comments = actionTotals.comments;
+  current.shares = actionTotals.shares;
+  current.leads = actionTotals.leads;
+  current.purchases = actionTotals.purchases;
+  current.revenue = actionTotals.revenue;
   campaigns.set(campaignId, current);
 }
 
@@ -162,17 +243,50 @@ export default async function handler(request, response) {
       limit: "500",
     });
     const insightsPayload = await fetchMetaJson(`${baseUrl}/insights?${insightsParams}`);
+    const totalInsightsParams = new URLSearchParams({
+      access_token: token,
+      level: "campaign",
+      time_range: JSON.stringify({ since: from, until: to }),
+      fields:
+        "campaign_id,campaign_name,objective,spend,impressions,reach,clicks,inline_link_clicks,actions,action_values,date_start,date_stop",
+      limit: "500",
+    });
+    const totalInsightsPayload = await fetchMetaJson(`${baseUrl}/insights?${totalInsightsParams}`);
     const campaigns = new Map();
 
     (insightsPayload.data || []).forEach((row) => {
       addDailyToCampaign(campaigns, row, campaignMeta.get(row.campaign_id));
     });
 
+    (totalInsightsPayload.data || []).forEach((row) => {
+      applyPeriodTotalsToCampaign(campaigns, row, campaignMeta.get(row.campaign_id));
+    });
+
+    const previousRange = getPreviousYearRange(from, to);
+    let comparison = null;
+
+    try {
+      const [currentTotals, previousTotals] = await Promise.all([
+        fetchAccountTotals(baseUrl, token, from, to),
+        fetchAccountTotals(baseUrl, token, previousRange.from, previousRange.to),
+      ]);
+
+      comparison = {
+        date_start: previousRange.from,
+        date_stop: previousRange.to,
+        current: currentTotals,
+        previous: previousTotals,
+      };
+    } catch {
+      comparison = null;
+    }
+
     sendJson(response, 200, {
       mode: "live",
       date_start: from,
       date_stop: to,
       updatedAt: new Date().toISOString(),
+      comparison,
       availableCampaigns: (campaignPayload.data || []).map((campaign) => ({
         id: campaign.id,
         name: campaign.name,
