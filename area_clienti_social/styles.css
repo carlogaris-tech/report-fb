@@ -573,42 +573,214 @@ button {
     linear-gradient(155deg, rgba(16, 27, 44, 0.98), rgba(8, 18, 31, 0.96));
 }
 
-.ai-grid {
+.ai-advisor {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
+  grid-template-columns: minmax(260px, 0.9fr) minmax(0, 1.4fr);
+  gap: 16px;
+  align-items: stretch;
 }
 
-.ai-card {
-  min-height: 170px;
+.ai-summary,
+.ai-action {
   display: grid;
   align-content: start;
-  gap: 12px;
-  padding: 18px;
+  gap: 10px;
   border: 1px solid rgba(200, 255, 99, 0.16);
   border-radius: 8px;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.035));
 }
 
-.ai-card span {
+.ai-summary {
+  min-height: 100%;
+  padding: 22px;
+  border-color: rgba(200, 255, 99, 0.28);
+  background:
+    radial-gradient(circle at 20% 0%, rgba(200, 255, 99, 0.2), transparent 42%),
+    linear-gradient(150deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.035));
+}
+
+.ai-actions {
+  display: grid;
+  gap: 10px;
+}
+
+.ai-action {
+  min-height: 112px;
+  padding: 16px 18px;
+}
+
+.ai-summary span,
+.ai-action span {
   color: var(--lime);
   font-size: 0.76rem;
   font-weight: 850;
   text-transform: uppercase;
 }
 
-.ai-card strong {
+.ai-summary strong {
+  color: #ffffff;
+  font-size: clamp(1.45rem, 2.2vw, 2.1rem);
+  line-height: 1.08;
+}
+
+.ai-action strong {
   color: #ffffff;
   font-size: 1.02rem;
   line-height: 1.28;
 }
 
-.ai-card p {
+.ai-summary p,
+.ai-action p {
   margin: 0;
   color: #c9d8ea;
   line-height: 1.5;
   font-weight: 680;
+}
+
+.ai-pie-block {
+  display: grid;
+  grid-template-columns: 136px minmax(0, 1fr);
+  gap: 16px;
+  align-items: center;
+  margin-top: 8px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ai-pie {
+  width: 136px;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  box-shadow:
+    inset 0 0 0 18px rgba(6, 16, 29, 0.72),
+    0 18px 36px rgba(0, 0, 0, 0.18);
+}
+
+.ai-pie strong,
+.ai-pie small {
+  display: block;
+  text-align: center;
+}
+
+.ai-pie strong {
+  color: #ffffff;
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.ai-pie small {
+  margin-top: -28px;
+  color: var(--lime);
+  font-size: 0.72rem;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.ai-legend {
+  display: grid;
+  gap: 9px;
+  min-width: 0;
+}
+
+.ai-legend div {
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr) max-content;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.ai-legend i {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+}
+
+.ai-legend span {
+  color: #d7e5f7;
+  font-size: 0.8rem;
+  font-weight: 760;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ai-legend strong {
+  color: #ffffff;
+  font-size: 0.86rem;
+}
+
+.ai-compare {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ai-compare-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ai-compare-heading span {
+  color: var(--lime);
+  font-size: 0.76rem;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.ai-compare-heading strong {
+  color: #ffffff;
+  font-size: 0.9rem;
+}
+
+.ai-compare-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.ai-compare-item {
+  display: grid;
+  gap: 5px;
+  padding: 11px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.ai-compare-item.is-positive {
+  border-color: rgba(200, 255, 99, 0.24);
+  background: rgba(200, 255, 99, 0.07);
+}
+
+.ai-compare-item span,
+.ai-compare-item small {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 760;
+}
+
+.ai-compare-item strong {
+  color: #ffffff;
+  font-size: 1.12rem;
+  line-height: 1;
+}
+
+.ai-compare-item.is-positive strong {
+  color: var(--lime);
+}
+
+.ai-compare-empty {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
 }
 
 .report-section {
@@ -1034,13 +1206,26 @@ pre code {
   .status-strip,
   .metric-grid,
   .engagement-grid,
-  .ai-grid,
+  .ai-advisor,
   .sidebar nav {
     grid-template-columns: 1fr;
   }
 
   .panel-heading.split {
     display: grid;
+  }
+
+  .ai-pie-block {
+    grid-template-columns: 1fr;
+    justify-items: start;
+  }
+
+  .ai-compare-heading {
+    display: grid;
+  }
+
+  .ai-compare-grid {
+    grid-template-columns: 1fr;
   }
 
   .bar-chart {
