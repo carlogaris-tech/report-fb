@@ -233,7 +233,7 @@ h3 {
 }
 
 .top-actions {
-  grid-template-columns: minmax(170px, 0.7fr) minmax(280px, 1.2fr) minmax(180px, 0.8fr) max-content;
+  grid-template-columns: minmax(170px, 0.45fr) minmax(320px, 1fr);
   align-items: end;
   gap: 10px;
   padding: 14px;
@@ -1156,7 +1156,7 @@ pre code {
   }
 
   .top-actions {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .date-controls {
