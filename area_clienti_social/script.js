@@ -20,6 +20,7 @@ const connectionLabel = document.querySelector("#connectionLabel");
 const connectionDetail = document.querySelector("#connectionDetail");
 const barChart = document.querySelector("#barChart");
 const engagementGrid = document.querySelector("#engagementGrid");
+const aiInsights = document.querySelector("#aiInsights");
 const followerChart = document.querySelector("#followerChart");
 const chartButtons = Array.from(document.querySelectorAll("[data-chart-metric]"));
 const exportCsv = document.querySelector("#exportCsv");
@@ -491,7 +492,7 @@ function getSelectedRange() {
   return { from, to };
 }
 
-function getCampaignForRange(campaign, range) {
+function getCampaignForRange(campaign, range, reportRange = {}) {
   const selectedDaily = campaign.daily.filter((day) => {
     if (range.from && day.date < range.from) return false;
     if (range.to && day.date > range.to) return false;
@@ -500,7 +501,10 @@ function getCampaignForRange(campaign, range) {
 
   if (campaign.daily.length === 0) return campaign;
 
-  return selectedDaily.reduce(
+  const usesFullReportRange =
+    (!range.from || range.from === reportRange.from) && (!range.to || range.to === reportRange.to);
+
+  const filteredCampaign = selectedDaily.reduce(
     (acc, day) => {
       acc.spend += day.spend;
       acc.impressions += day.impressions;
@@ -533,12 +537,22 @@ function getCampaignForRange(campaign, range) {
       daily: selectedDaily,
     }
   );
+
+  if (usesFullReportRange) {
+    filteredCampaign.reach = campaign.reach;
+  }
+
+  return filteredCampaign;
 }
 
 function getFilteredReport(report) {
   const range = getSelectedRange();
+  const reportRange = {
+    from: report.date_start,
+    to: report.date_stop,
+  };
   const dateFilteredCampaigns = report.campaigns.map((campaign) =>
-    getCampaignForRange(campaign, range)
+    getCampaignForRange(campaign, range, reportRange)
   );
 
   return {
@@ -825,6 +839,111 @@ function renderEngagement(totals, report) {
     .join("");
 }
 
+function getCampaignEfficiency(campaign) {
+  const ctr = campaign.impressions > 0 ? (campaign.clicks / campaign.impressions) * 100 : 0;
+  const cpc = campaign.clicks > 0 ? campaign.spend / campaign.clicks : 0;
+  const contentCost = campaign.leads > 0 ? campaign.spend / campaign.leads : 0;
+  const engagementRate =
+    campaign.reach > 0
+      ? ((campaign.likes + campaign.comments + campaign.shares) / campaign.reach) * 100
+      : 0;
+
+  return {
+    ...campaign,
+    ctr,
+    cpc,
+    contentCost,
+    engagementRate,
+  };
+}
+
+function pickBestCampaign(campaigns, metric, direction = "max") {
+  const filtered = campaigns.filter((campaign) => Number.isFinite(campaign[metric]) && campaign[metric] > 0);
+  if (filtered.length === 0) return null;
+
+  return filtered.reduce((best, campaign) => {
+    if (!best) return campaign;
+    return direction === "min"
+      ? campaign[metric] < best[metric]
+        ? campaign
+        : best
+      : campaign[metric] > best[metric]
+        ? campaign
+        : best;
+  }, null);
+}
+
+function renderAiInsights(totals, report) {
+  const campaigns = report.campaigns
+    .filter((campaign) => campaign.spend > 0 || campaign.impressions > 0 || campaign.clicks > 0)
+    .map(getCampaignEfficiency);
+
+  if (campaigns.length === 0) {
+    aiInsights.innerHTML = `
+      <article class="ai-card">
+        <span>Dati insufficienti</span>
+        <strong>Analisi non disponibile</strong>
+        <p>Nel periodo selezionato non ci sono dati Meta sufficienti per generare suggerimenti attendibili.</p>
+      </article>
+    `;
+    return;
+  }
+
+  const bestCtr = pickBestCampaign(campaigns, "ctr");
+  const bestCpc = pickBestCampaign(campaigns, "cpc", "min");
+  const bestContentCost = pickBestCampaign(campaigns, "contentCost", "min");
+  const bestEngagement = pickBestCampaign(campaigns, "engagementRate");
+  const weakCtr = pickBestCampaign(campaigns, "ctr", "min");
+  const budgetReference = bestContentCost || bestCpc || bestCtr || campaigns[0];
+  const engagementText = bestEngagement
+    ? `${bestEngagement.name} ha il miglior tasso di interazione (${formatDecimal(bestEngagement.engagementRate)}%).`
+    : "Le interazioni risultano distribuite in modo simile tra le campagne.";
+  const optimizationText =
+    weakCtr && weakCtr.ctr > 0
+      ? `${weakCtr.name} ha il CTR piu basso (${formatDecimal(weakCtr.ctr)}%): puo valere un test su creativita, messaggio o call to action.`
+      : "Non emergono campagne con criticita evidenti sul CTR nel periodo selezionato.";
+  const budgetText = budgetReference
+    ? `Valutare una quota aggiuntiva del 10-15% su ${budgetReference.name}, monitorando costo medio e visualizzazioni sito nei giorni successivi.`
+    : "Mantenere il budget attuale e rivalutare dopo nuovi dati.";
+
+  const cards = [
+    {
+      label: "Cosa sta funzionando",
+      title: bestCtr
+        ? `${bestCtr.name} genera il CTR migliore (${formatDecimal(bestCtr.ctr)}%).`
+        : "Le campagne hanno performance equilibrate.",
+      text: engagementText,
+    },
+    {
+      label: "Dove ottimizzare",
+      title: bestCpc
+        ? `CPC migliore su ${bestCpc.name}: ${formatCurrency(bestCpc.cpc)}.`
+        : "Costo per click non ancora significativo.",
+      text: optimizationText,
+    },
+    {
+      label: "Possibile allocazione budget",
+      title:
+        totals.spend > 0
+          ? `Budget analizzato: ${formatCurrency(totals.spend)} nel periodo.`
+          : "Budget non disponibile nel periodo.",
+      text: budgetText,
+    },
+  ];
+
+  aiInsights.innerHTML = cards
+    .map(
+      (card) => `
+        <article class="ai-card">
+          <span>${escapeHtml(card.label)}</span>
+          <strong>${escapeHtml(card.title)}</strong>
+          <p>${escapeHtml(card.text)}</p>
+        </article>
+      `
+    )
+    .join("");
+}
+
 function renderChart(report) {
   const days = aggregateDaily(report);
   const max = Math.max(...days.map((day) => day[activeChartMetric]), 1);
@@ -903,6 +1022,7 @@ function renderDashboard(mode = "demo", detail = "") {
   renderStatus(mode, detail);
   renderMetrics(totals);
   renderEngagement(totals, currentReport);
+  renderAiInsights(totals, currentReport);
   renderCampaigns(currentReport);
   renderChart(currentReport);
   renderFollowerChart(currentReport);
