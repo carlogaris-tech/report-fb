@@ -171,6 +171,7 @@ let activeChartMetric = "spend";
 let currentConnectionMode = "mock";
 let selectedCampaignId = "all";
 let campaignOptionsCache = [];
+let activeReportRequestId = 0;
 
 function escapeHtml(text) {
   const div = document.createElement("div");
@@ -1396,6 +1397,16 @@ function buildUnavailableReport(clientId, range, previousReport = null) {
   };
 }
 
+function setReportLoading(isLoading) {
+  [campaignSelect, dateFrom, dateTo, applyDateFilter, exportCsv].forEach((control) => {
+    if (control) control.disabled = isLoading;
+  });
+
+  if (applyDateFilter) {
+    applyDateFilter.textContent = isLoading ? "Caricamento..." : "Applica filtro";
+  }
+}
+
 function mockMetaInsightsRequest(clientId, range) {
   return new Promise((resolve) => {
     window.setTimeout(() => {
@@ -1407,28 +1418,47 @@ function mockMetaInsightsRequest(clientId, range) {
 async function loadReport() {
   const fallback = fallbackReports[currentClient.id];
   const range = getEndpointRange();
-  const endpoint = `${currentClient.endpoint}?client=${encodeURIComponent(
-    currentClient.id
-  )}&period=custom&date_start=${encodeURIComponent(
-    range.from
-  )}&date_stop=${encodeURIComponent(range.to)}`;
+  const requestId = ++activeReportRequestId;
+  const endpointParams = new URLSearchParams({
+    client: currentClient.id,
+    period: "custom",
+    date_start: range.from,
+    date_stop: range.to,
+  });
+
+  if (selectedCampaignId !== "all") {
+    endpointParams.set("campaign_id", selectedCampaignId);
+  }
+
+  const endpoint = `${currentClient.endpoint}?${endpointParams}`;
+
+  setReportLoading(true);
 
   if (useMockMetaApi) {
-    const payload = await mockMetaInsightsRequest(currentClient.id, range);
-    currentFullReport = normalizeReport(payload, fallback);
-    syncDateInputsFromPeriod(currentFullReport);
-    renderCampaignOptions(currentFullReport);
-    currentReport = getFilteredReport(currentFullReport);
-    renderDashboard("mock", "Report aggiornato.");
+    try {
+      const payload = await mockMetaInsightsRequest(currentClient.id, range);
+      if (requestId !== activeReportRequestId) return;
+      currentFullReport = normalizeReport(payload, fallback);
+      syncDateInputsFromPeriod(currentFullReport);
+      renderCampaignOptions(currentFullReport);
+      currentReport = getFilteredReport(currentFullReport);
+      renderDashboard("mock", "Report aggiornato.");
+    } finally {
+      if (requestId === activeReportRequestId) {
+        setReportLoading(false);
+      }
+    }
     return;
   }
 
   try {
     const response = await fetch(endpoint, {
       credentials: "same-origin",
+      cache: "no-store",
       headers: { Accept: "application/json" },
     });
     const payload = await response.json();
+    if (requestId !== activeReportRequestId) return;
     const hasCampaignData = Array.isArray(payload.campaigns) && payload.campaigns.length > 0;
     const hasCampaignOptions =
       Array.isArray(payload.availableCampaigns) && payload.availableCampaigns.length > 0;
@@ -1447,6 +1477,7 @@ async function loadReport() {
     currentReport = getFilteredReport(currentFullReport);
     renderDashboard("live", "Report aggiornato.");
   } catch (error) {
+    if (requestId !== activeReportRequestId) return;
     const unavailablePayload = buildUnavailableReport(currentClient.id, range, currentFullReport);
     currentFullReport = normalizeReport(unavailablePayload, fallback);
     syncDateInputsFromPeriod(currentFullReport);
@@ -1454,6 +1485,10 @@ async function loadReport() {
     currentReport = getFilteredReport(currentFullReport);
     console.warn("Meta Insights non disponibili.", error);
     renderDashboard("error", "Dati momentaneamente non disponibili.");
+  } finally {
+    if (requestId === activeReportRequestId) {
+      setReportLoading(false);
+    }
   }
 }
 
