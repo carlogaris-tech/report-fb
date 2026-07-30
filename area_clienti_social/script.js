@@ -588,6 +588,8 @@ function normalizeCampaignOption(campaign) {
     name: campaign.name || "Campagna senza nome",
     status: campaign.effective_status || campaign.status || "ACTIVE",
     objective: campaign.objective || "-",
+    created_time: campaign.created_time || "",
+    updated_time: campaign.updated_time || "",
   };
 }
 
@@ -1425,10 +1427,6 @@ async function loadReport() {
     date_start: range.from,
     date_stop: range.to,
   });
-
-  if (selectedCampaignId !== "all") {
-    endpointParams.set("campaign_id", selectedCampaignId);
-  }
 
   const endpoint = `${currentClient.endpoint}?${endpointParams}`;
 
