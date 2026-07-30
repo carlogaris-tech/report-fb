@@ -428,7 +428,7 @@ function getCampaignMonthRange(campaign) {
 
   return capRangeToToday({
     from: `${year}-${String(firstMonth).padStart(2, "0")}-01`,
-    to: getMonthEnd(year, lastMonth),
+    to: mockDateRange.to || getMonthEnd(year, lastMonth),
   });
 }
 
