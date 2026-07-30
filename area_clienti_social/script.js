@@ -1537,6 +1537,8 @@ campaignSelect.addEventListener("change", () => {
   renderDashboard(currentConnectionMode);
 });
 applyDateFilter.addEventListener("click", () => {
+  selectedCampaignId = "all";
+  campaignSelect.value = "all";
   loadReport();
 });
 exportCsv.addEventListener("click", exportCurrentCsv);
