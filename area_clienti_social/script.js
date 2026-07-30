@@ -1,10 +1,8 @@
 const fixedClientName = document.querySelector("#fixedClientName");
 const campaignSelect = document.querySelector("#campaignSelect");
-const periodSelect = document.querySelector("#periodSelect");
 const dateFrom = document.querySelector("#dateFrom");
 const dateTo = document.querySelector("#dateTo");
 const applyDateFilter = document.querySelector("#applyDateFilter");
-const refreshData = document.querySelector("#refreshData");
 const clientTitle = document.querySelector("#clientTitle");
 const clientDescription = document.querySelector("#clientDescription");
 const accessClient = document.querySelector("#accessClient");
@@ -28,7 +26,7 @@ const exportCsv = document.querySelector("#exportCsv");
 const useMockMetaApi = false;
 const mockDateRange = {
   from: "2026-04-01",
-  to: "2026-07-22",
+  to: "2026-07-30",
 };
 
 const monthNames = {
@@ -172,7 +170,6 @@ let currentReport = fallbackReports[currentClient.id];
 let activeChartMetric = "spend";
 let currentConnectionMode = "mock";
 let selectedCampaignId = "all";
-let isManualRange = false;
 let campaignOptionsCache = [];
 
 function escapeHtml(text) {
@@ -477,10 +474,30 @@ function getQuickRange(report, period) {
 }
 
 function syncDateInputsFromPeriod(report) {
-  if (isManualRange) return;
-  const range = getQuickRange(report, periodSelect.value);
+  if (dateFrom.value && dateTo.value) return;
+  const range = getQuickRange(report, "last_30d");
   dateFrom.value = range.from;
   dateTo.value = range.to;
+}
+
+function ensureDateInputs() {
+  if (!dateFrom.value && !dateTo.value) {
+    const range = {
+      from: addDays(mockDateRange.to, -29),
+      to: mockDateRange.to,
+    };
+    dateFrom.value = range.from;
+    dateTo.value = range.to;
+    return;
+  }
+
+  if (dateFrom.value && !dateTo.value) {
+    dateTo.value = dateFrom.value;
+  }
+
+  if (!dateFrom.value && dateTo.value) {
+    dateFrom.value = dateTo.value;
+  }
 }
 
 function getSelectedRange() {
@@ -1390,13 +1407,9 @@ function mockMetaInsightsRequest(clientId, range) {
 async function loadReport() {
   const fallback = fallbackReports[currentClient.id];
   const range = getEndpointRange();
-  if (!isManualRange) {
-    dateFrom.value = range.from;
-    dateTo.value = range.to;
-  }
   const endpoint = `${currentClient.endpoint}?client=${encodeURIComponent(
     currentClient.id
-  )}&period=${encodeURIComponent(isManualRange ? "custom" : periodSelect.value)}&date_start=${encodeURIComponent(
+  )}&period=custom&date_start=${encodeURIComponent(
     range.from
   )}&date_stop=${encodeURIComponent(range.to)}`;
 
@@ -1456,13 +1469,7 @@ function initializeReport() {
 }
 
 function getEndpointRange() {
-  const fallback = fallbackReports[currentClient.id];
-  const referenceReport = currentFullReport || normalizeReport(fallback, fallback);
-
-  if (!isManualRange) {
-    return getQuickRange(referenceReport, periodSelect.value);
-  }
-
+  ensureDateInputs();
   return getSelectedRange();
 }
 
@@ -1504,7 +1511,7 @@ function exportCurrentCsv() {
   const link = document.createElement("a");
   link.href = url;
   const campaignSlug = selectedCampaignId === "all" ? "tutte-campagne" : selectedCampaignId;
-  const periodSlug = isManualRange ? "periodo-personalizzato" : periodSelect.value;
+  const periodSlug = "periodo-personalizzato";
   link.download = `report-social-${currentClient.id}-${campaignSlug}-${periodSlug}.csv`;
   link.click();
   URL.revokeObjectURL(url);
@@ -1520,7 +1527,6 @@ campaignSelect.addEventListener("change", () => {
   const campaignRange = getCampaignMonthRange(selectedCampaign);
 
   if (campaignRange) {
-    isManualRange = true;
     dateFrom.value = campaignRange.from;
     dateTo.value = campaignRange.to;
     loadReport();
@@ -1530,13 +1536,7 @@ campaignSelect.addEventListener("change", () => {
   currentReport = getFilteredReport(currentFullReport);
   renderDashboard(currentConnectionMode);
 });
-periodSelect.addEventListener("change", () => {
-  isManualRange = false;
-  loadReport();
-});
-refreshData.addEventListener("click", loadReport);
 applyDateFilter.addEventListener("click", () => {
-  isManualRange = true;
   loadReport();
 });
 exportCsv.addEventListener("click", exportCurrentCsv);
