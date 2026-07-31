@@ -1562,17 +1562,18 @@ campaignSelect.addEventListener("change", () => {
   if (campaignRange) {
     dateFrom.value = campaignRange.from;
     dateTo.value = campaignRange.to;
-    loadReport();
-    return;
   }
-
-  currentReport = getFilteredReport(currentFullReport);
-  renderDashboard(currentConnectionMode);
 });
 applyDateFilter.addEventListener("click", () => {
+  loadReport();
+});
+dateFrom.addEventListener("change", () => {
   selectedCampaignId = "all";
   campaignSelect.value = "all";
-  loadReport();
+});
+dateTo.addEventListener("change", () => {
+  selectedCampaignId = "all";
+  campaignSelect.value = "all";
 });
 exportCsv.addEventListener("click", exportCurrentCsv);
 
