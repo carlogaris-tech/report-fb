@@ -233,7 +233,7 @@ h3 {
 }
 
 .top-actions {
-  grid-template-columns: minmax(170px, 0.45fr) minmax(320px, 1fr);
+  grid-template-columns: minmax(170px, 0.42fr) minmax(300px, 1fr) max-content;
   align-items: end;
   gap: 10px;
   padding: 14px;
