@@ -582,13 +582,14 @@ select:disabled {
 
 .ai-advisor {
   display: grid;
-  grid-template-columns: minmax(260px, 0.9fr) minmax(0, 1.4fr);
+  grid-template-columns: minmax(360px, 0.9fr) minmax(0, 1.35fr);
   gap: 16px;
   align-items: stretch;
 }
 
 .ai-summary,
 .ai-action {
+  min-width: 0;
   display: grid;
   align-content: start;
   gap: 10px;
@@ -608,6 +609,7 @@ select:disabled {
 }
 
 .ai-actions {
+  min-width: 0;
   display: grid;
   gap: 10px;
 }
@@ -627,14 +629,16 @@ select:disabled {
 
 .ai-summary strong {
   color: #ffffff;
-  font-size: clamp(1.45rem, 2.2vw, 2.1rem);
+  font-size: clamp(1.35rem, 1.8vw, 1.85rem);
   line-height: 1.08;
+  overflow-wrap: anywhere;
 }
 
 .ai-action strong {
   color: #ffffff;
   font-size: 1.02rem;
   line-height: 1.28;
+  overflow-wrap: anywhere;
 }
 
 .ai-summary p,
@@ -643,6 +647,7 @@ select:disabled {
   color: #c9d8ea;
   line-height: 1.5;
   font-weight: 680;
+  overflow-wrap: anywhere;
 }
 
 .ai-pie-block {
@@ -710,9 +715,7 @@ select:disabled {
   color: #d7e5f7;
   font-size: 0.8rem;
   font-weight: 760;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 
 .ai-legend strong {
@@ -729,9 +732,9 @@ select:disabled {
 }
 
 .ai-compare-heading {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) max-content;
   align-items: end;
-  justify-content: space-between;
   gap: 12px;
 }
 
@@ -745,6 +748,7 @@ select:disabled {
 .ai-compare-heading strong {
   color: #ffffff;
   font-size: 0.9rem;
+  text-align: right;
 }
 
 .ai-compare-grid {
