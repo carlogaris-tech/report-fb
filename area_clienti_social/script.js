@@ -27,7 +27,7 @@ const exportCsv = document.querySelector("#exportCsv");
 const useMockMetaApi = false;
 const mockDateRange = {
   from: "2026-04-01",
-  to: "2026-07-30",
+  to: "2026-07-31",
 };
 
 const monthNames = {
@@ -408,7 +408,7 @@ function capRangeToToday(range) {
 function getCampaignMonthRange(campaign) {
   const name = (campaign?.name || "").toLowerCase();
   const monthPattern =
-    /(gennaio|febbraio|marzo|aprile|maggio|giugno|luglio|agosto|settembre|ottobre|novembre|dicembre|gen|feb|mar|apr|mag|giu|lug|ago|set|ott|nov|dic)\s*[-_/ ]*\s*(\d{2,4})?/g;
+    /(?:^|[^a-zàèéìòù])(gennaio|febbraio|marzo|aprile|maggio|giugno|luglio|agosto|settembre|ottobre|novembre|dicembre|gen|feb|mar|apr|mag|giu|lug|ago|set|ott|nov|dic)(?:\s*[-_/ ]*\s*(\d{2,4}))?/g;
   const matches = [];
   let match = monthPattern.exec(name);
 
@@ -429,7 +429,7 @@ function getCampaignMonthRange(campaign) {
 
   return capRangeToToday({
     from: `${year}-${String(firstMonth).padStart(2, "0")}-01`,
-    to: mockDateRange.to || getMonthEnd(year, lastMonth),
+    to: getMonthEnd(year, lastMonth),
   });
 }
 
