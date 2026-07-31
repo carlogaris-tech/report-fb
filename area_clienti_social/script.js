@@ -180,6 +180,14 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
+function formatCampaignLabel(name) {
+  return String(name || "Campagna")
+    .replace(/^Salottidea[_\s-]*/i, "")
+    .replaceAll("_", " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function clamp(value) {
   return Math.max(0, Math.min(100, Math.round(value)));
 }
@@ -920,7 +928,7 @@ function getBudgetAllocation(campaigns) {
     allocated += percentage;
 
     return {
-      name: campaign.name,
+      name: formatCampaignLabel(campaign.name),
       percentage,
       color: colors[index],
     };
@@ -1043,29 +1051,35 @@ function renderAiInsights(totals, report) {
   const bestEngagement = pickBestCampaign(campaigns, "engagementRate");
   const weakCtr = pickBestCampaign(campaigns, "ctr", "min");
   const budgetReference = bestContentCost || bestCpc || bestCtr || campaigns[0];
+  const bestCtrName = formatCampaignLabel(bestCtr?.name);
+  const bestCpcName = formatCampaignLabel(bestCpc?.name);
+  const bestEngagementName = formatCampaignLabel(bestEngagement?.name);
+  const weakCtrName = formatCampaignLabel(weakCtr?.name);
+  const budgetReferenceName = formatCampaignLabel(budgetReference?.name);
+  const mainCampaignName = formatCampaignLabel((bestCtr || bestEngagement || budgetReference)?.name);
   const engagementText = bestEngagement
-    ? `${bestEngagement.name} ha il miglior tasso di interazione (${formatDecimal(bestEngagement.engagementRate)}%).`
+    ? `${bestEngagementName} ha il miglior tasso di interazione (${formatDecimal(bestEngagement.engagementRate)}%).`
     : "Le interazioni risultano distribuite in modo simile tra le campagne.";
   const optimizationText =
     weakCtr && weakCtr.ctr > 0
-      ? `${weakCtr.name} ha il CTR piu basso (${formatDecimal(weakCtr.ctr)}%): puo valere un test su creativita, messaggio o call to action.`
+      ? `${weakCtrName} ha il CTR piu basso (${formatDecimal(weakCtr.ctr)}%): puo valere un test su creativita, messaggio o call to action.`
       : "Non emergono campagne con criticita evidenti sul CTR nel periodo selezionato.";
   const budgetText = budgetReference
-    ? `Valutare una quota aggiuntiva del 10-15% su ${budgetReference.name}, monitorando costo medio e visualizzazioni sito nei giorni successivi.`
+    ? `Valutare una quota aggiuntiva del 10-15% su ${budgetReferenceName}, monitorando costo medio e visualizzazioni sito nei giorni successivi.`
     : "Mantenere il budget attuale e rivalutare dopo nuovi dati.";
 
   const cards = [
     {
       label: "Cosa sta funzionando",
       title: bestCtr
-        ? `${bestCtr.name} genera il CTR migliore (${formatDecimal(bestCtr.ctr)}%).`
+        ? `${bestCtrName} genera il CTR migliore (${formatDecimal(bestCtr.ctr)}%).`
         : "Le campagne hanno performance equilibrate.",
       text: engagementText,
     },
     {
       label: "Dove ottimizzare",
       title: bestCpc
-        ? `CPC migliore su ${bestCpc.name}: ${formatCurrency(bestCpc.cpc)}.`
+        ? `CPC migliore su ${bestCpcName}: ${formatCurrency(bestCpc.cpc)}.`
         : "Costo per click non ancora significativo.",
       text: optimizationText,
     },
@@ -1089,7 +1103,7 @@ function renderAiInsights(totals, report) {
   aiInsights.innerHTML = `
     <div class="ai-summary">
       <span>Lettura previsionale</span>
-      <strong>${escapeHtml(mainCampaign ? mainCampaign.name : "Periodo selezionato")}</strong>
+      <strong>${escapeHtml(mainCampaign ? mainCampaignName : "Periodo selezionato")}</strong>
       <p>${escapeHtml(
         mainCampaign
           ? `La campagna mostra il segnale piu interessante nel periodo, con ${mainMetric} e un costo medio per click di ${formatCurrency(mainCampaign.cpc)}.`
