@@ -1,5 +1,6 @@
 const fixedClientName = document.querySelector("#fixedClientName");
 const campaignSelect = document.querySelector("#campaignSelect");
+const confirmCampaign = document.querySelector("#confirmCampaign");
 const dateFrom = document.querySelector("#dateFrom");
 const dateTo = document.querySelector("#dateTo");
 const applyDateFilter = document.querySelector("#applyDateFilter");
@@ -1400,12 +1401,16 @@ function buildUnavailableReport(clientId, range, previousReport = null) {
 }
 
 function setReportLoading(isLoading) {
-  [campaignSelect, dateFrom, dateTo, applyDateFilter, exportCsv].forEach((control) => {
+  [campaignSelect, confirmCampaign, dateFrom, dateTo, applyDateFilter, exportCsv].forEach((control) => {
     if (control) control.disabled = isLoading;
   });
 
   if (applyDateFilter) {
     applyDateFilter.textContent = isLoading ? "Caricamento..." : "Applica filtro";
+  }
+
+  if (confirmCampaign) {
+    confirmCampaign.textContent = isLoading ? "Caricamento..." : "Conferma selezione";
   }
 }
 
@@ -1554,6 +1559,15 @@ initializeReport();
 
 campaignSelect.addEventListener("change", () => {
   selectedCampaignId = campaignSelect.value;
+});
+confirmCampaign.addEventListener("click", () => {
+  selectedCampaignId = campaignSelect.value;
+
+  if (selectedCampaignId === "all") {
+    loadReport();
+    return;
+  }
+
   const selectedCampaign = (currentFullReport.availableCampaigns || currentFullReport.campaigns).find(
     (campaign) => campaign.id === selectedCampaignId
   );
@@ -1562,7 +1576,11 @@ campaignSelect.addEventListener("change", () => {
   if (campaignRange) {
     dateFrom.value = campaignRange.from;
     dateTo.value = campaignRange.to;
+    loadReport();
+    return;
   }
+
+  loadReport();
 });
 applyDateFilter.addEventListener("click", () => {
   loadReport();
