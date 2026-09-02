@@ -206,12 +206,17 @@ function formatDecimal(value, digits = 2) {
   }).format(Number(value) || 0);
 }
 
-function formatCurrency(value) {
+function formatCurrency(value, digits = 0) {
   return new Intl.NumberFormat("it-IT", {
     style: "currency",
     currency: "EUR",
-    maximumFractionDigits: 0,
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
   }).format(Number(value) || 0);
+}
+
+function formatCpc(value) {
+  return formatCurrency(value, 2);
 }
 
 function formatDateTime(value) {
@@ -898,8 +903,8 @@ function renderMetrics(totals) {
     ["Click", formatNumber(totals.clicks), `CTR ${formatDecimal(totals.ctr)}%`],
     ["Like", formatNumber(totals.likes), `${formatNumber(totals.engagement)} interazioni totali`],
     ["Commenti", formatNumber(totals.comments), `${formatNumber(totals.shares)} condivisioni`],
-    ["CPC medio", formatCurrency(totals.cpc), "Costo medio per click"],
-    ["Visualizzazioni contenuti sul sito web", formatNumber(totals.leads), `Costo medio ${formatCurrency(totals.cpl)}`],
+    ["CPC medio", formatCpc(totals.cpc), "CPC tutti i clic"],
+    ["Visualizzazioni contenuti sul sito web", formatNumber(totals.leads), `Costo medio ${formatCpc(totals.cpl)}`],
     ["ROAS", `${formatDecimal(totals.roas, 1)}x`, "Ricavi / spesa adv"],
     [
       "Conversion rate",
@@ -937,7 +942,7 @@ function renderCampaigns(report) {
           <td>${formatCurrency(campaign.spend)}</td>
           <td>${formatNumber(campaign.reach)}</td>
           <td>${formatDecimal(ctr)}%</td>
-          <td>${formatCurrency(cpc)}</td>
+          <td>${formatCpc(cpc)}</td>
           <td>${formatNumber(campaign.likes)}</td>
           <td>${formatNumber(campaign.leads)}</td>
           <td><span class="badge ${paused ? "is-paused" : ""}">${escapeHtml(campaign.status)}</span></td>
@@ -1093,7 +1098,7 @@ function getComparisonItems(comparison) {
     {
       label: "CPC medio",
       value: formatPercentChange(getPercentChange(currentCpc, previousCpc)),
-      note: `${formatCurrency(currentCpc)} vs ${formatCurrency(previousCpc)}`,
+      note: `${formatCpc(currentCpc)} vs ${formatCpc(previousCpc)}`,
       inverse: true,
     },
   ];
@@ -1189,7 +1194,7 @@ function renderAiInsights(totals, report) {
     {
       label: "Dove ottimizzare",
       title: bestCpc
-        ? `CPC migliore su ${bestCpcName}: ${formatCurrency(bestCpc.cpc)}.`
+        ? `CPC migliore su ${bestCpcName}: ${formatCpc(bestCpc.cpc)}.`
         : "Costo per click non ancora significativo.",
       text: optimizationText,
     },
@@ -1216,7 +1221,7 @@ function renderAiInsights(totals, report) {
       <strong>${escapeHtml(mainCampaign ? mainCampaignName : "Periodo selezionato")}</strong>
       <p>${escapeHtml(
         mainCampaign
-          ? `La campagna mostra il segnale piu interessante nel periodo, con ${mainMetric} e un costo medio per click di ${formatCurrency(mainCampaign.cpc)}.`
+          ? `La campagna mostra il segnale piu interessante nel periodo, con ${mainMetric} e un costo medio per click di ${formatCpc(mainCampaign.cpc)}.`
           : "Le campagne hanno performance distribuite in modo equilibrato nel periodo selezionato."
       )}</p>
       <div class="ai-pie-block" aria-label="Allocazione budget suggerita">
