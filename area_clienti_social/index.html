@@ -27,8 +27,8 @@
           <a class="is-active" href="#overview">Overview</a>
           <a href="#consulta">Consulta per data</a>
           <a href="#engagement">Engagement</a>
-          <a href="#campagne">Campagne</a>
           <a href="#follower">Follower</a>
+          <a href="#campagne">Campagne</a>
         </nav>
 
         <section class="access-card">
@@ -74,14 +74,21 @@
             </p>
           </div>
 
+          <div class="date-presets" aria-label="Intervalli rapidi">
+            <button class="ghost-button" type="button" data-range-preset="1m">1 mese</button>
+            <button class="ghost-button" type="button" data-range-preset="3m">3 mesi</button>
+            <button class="ghost-button" type="button" data-range-preset="6m">6 mesi</button>
+            <button class="ghost-button" type="button" data-range-preset="lifetime">Life time</button>
+          </div>
+
           <div class="date-controls">
             <label>
               Dal
-              <input id="dateFrom" type="date" min="2024-01-01" max="2026-07-31" aria-label="Data inizio">
+              <input id="dateFrom" type="date" min="2024-01-01" aria-label="Data inizio">
             </label>
             <label>
               Al
-              <input id="dateTo" type="date" min="2024-01-01" max="2026-07-31" aria-label="Data fine">
+              <input id="dateTo" type="date" min="2024-01-01" aria-label="Data fine">
             </label>
             <button class="primary-button" type="button" id="applyDateFilter">
               Applica filtro
@@ -152,6 +159,7 @@
               <h2>Nuovi follower e defollow giornalieri</h2>
             </div>
             <div class="follower-chart" id="followerChart" aria-label="Grafico follower per giorno"></div>
+            <div class="demographic-grid" id="demographicGrid" aria-label="Distribuzione per eta e genere"></div>
           </section>
         </section>
 
