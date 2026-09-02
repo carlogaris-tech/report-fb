@@ -1387,7 +1387,7 @@ function renderFollowerDemographics(report) {
   const genderItems = aggregateByDemographic(demographics, "gender");
 
   demographicGrid.innerHTML = `
-    ${renderDemographicList("Eta", ageItems)}
+    ${renderDemographicList("Età", ageItems)}
     ${renderDemographicList("Genere", genderItems)}
   `;
 }
