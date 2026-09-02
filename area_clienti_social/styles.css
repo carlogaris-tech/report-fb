@@ -339,7 +339,7 @@ select:disabled {
 }
 
 .date-query-panel {
-  grid-template-columns: minmax(0, 1fr) minmax(420px, auto);
+  grid-template-columns: minmax(0, 1fr) minmax(280px, auto) minmax(420px, auto);
   align-items: end;
   gap: 24px;
   margin-bottom: 22px;
@@ -350,6 +350,16 @@ select:disabled {
     linear-gradient(135deg, rgba(114, 167, 255, 0.09), rgba(200, 255, 99, 0.04)),
     var(--surface);
   box-shadow: var(--shadow-soft);
+}
+
+.date-presets {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(110px, 1fr));
+  gap: 8px;
+}
+
+.date-presets button {
+  min-height: 44px;
 }
 
 .date-controls {
@@ -564,6 +574,62 @@ select:disabled {
   color: #c9d8ea;
   line-height: 1.4;
   font-weight: 760;
+}
+
+.demographic-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.demographic-card {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background:
+    radial-gradient(circle at 14% 0%, rgba(94, 234, 212, 0.11), transparent 42%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.065), rgba(255, 255, 255, 0.035));
+}
+
+.demographic-card h3 {
+  color: #ffffff;
+}
+
+.demographic-row {
+  display: grid;
+  gap: 7px;
+}
+
+.demographic-row div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.demographic-row strong {
+  color: #ffffff;
+}
+
+.demographic-row span,
+.demographic-empty {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 720;
+}
+
+.demographic-row i {
+  display: block;
+  height: 9px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--lime), var(--teal-bright));
+}
+
+.demographic-empty {
+  margin: 0;
+  line-height: 1.45;
 }
 
 .panel-note {
@@ -1174,6 +1240,10 @@ pre code {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
+  .date-presets {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
   .score-panel {
     position: static;
   }
@@ -1206,6 +1276,10 @@ pre code {
     gap: 8px;
   }
 
+  .date-presets {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   input,
   select,
   button {
@@ -1217,6 +1291,7 @@ pre code {
   .status-strip,
   .metric-grid,
   .engagement-grid,
+  .demographic-grid,
   .ai-advisor,
   .sidebar nav {
     grid-template-columns: 1fr;
