@@ -219,6 +219,15 @@ function formatCpc(value) {
   return formatCurrency(value, 2);
 }
 
+function formatCampaignStatus(status) {
+  const normalized = String(status || "").toUpperCase();
+  if (normalized === "ACTIVE") return "Attivata";
+  if (normalized === "PAUSED") return "In pausa";
+  if (normalized === "DELETED") return "Eliminata";
+  if (normalized === "ARCHIVED") return "Archiviata";
+  return status || "-";
+}
+
 function formatDateTime(value) {
   if (!value) return "-";
   return new Intl.DateTimeFormat("it-IT", {
@@ -901,7 +910,7 @@ function renderMetrics(totals) {
     ["Impression", formatNumber(totals.impressions), "Visualizzazioni generate"],
     ["Copertura", formatNumber(totals.reach), "Persone raggiunte nel periodo"],
     ["Click", formatNumber(totals.clicks), `CTR ${formatDecimal(totals.ctr)}%`],
-    ["Like", formatNumber(totals.likes), `${formatNumber(totals.engagement)} interazioni totali`],
+    ["Interazioni nette", formatNumber(totals.likes), `${formatNumber(totals.engagement)} interazioni totali`],
     ["Commenti", formatNumber(totals.comments), `${formatNumber(totals.shares)} condivisioni`],
     ["CPC medio", formatCpc(totals.cpc), "CPC tutti i clic"],
     ["Visualizzazioni contenuti sul sito web", formatNumber(totals.leads), `Costo medio ${formatCpc(totals.cpl)}`],
@@ -945,7 +954,7 @@ function renderCampaigns(report) {
           <td>${formatCpc(cpc)}</td>
           <td>${formatNumber(campaign.likes)}</td>
           <td>${formatNumber(campaign.leads)}</td>
-          <td><span class="badge ${paused ? "is-paused" : ""}">${escapeHtml(campaign.status)}</span></td>
+          <td><span class="badge ${paused ? "is-paused" : ""}">${escapeHtml(formatCampaignStatus(campaign.status))}</span></td>
         </tr>
       `;
     })
@@ -966,7 +975,7 @@ function renderEngagement(totals, report) {
 
   const cards = [
     ["Engagement rate", `${formatDecimal(totals.engagementRate)}%`, "Interazioni / persone raggiunte"],
-    ["Interazioni totali", formatNumber(totals.engagement), "Like, commenti e condivisioni"],
+    ["Interazioni totali", formatNumber(totals.engagement), "Interazioni nette, commenti e condivisioni"],
     ["Media giornaliera", formatNumber(averageEngagement), "Interazioni medie nel periodo"],
     ["ER medio giorno", `${formatDecimal(averageRate)}%`, "Media dei giorni selezionati"],
   ];
@@ -1739,7 +1748,7 @@ function exportCurrentCsv() {
       "impression",
       "copertura",
       "click",
-      "interazioni con la pagina",
+      "interazioni nette",
       "commenti",
       "condivisioni",
       "visualizzazioni contenuti sul sito web",
@@ -1747,7 +1756,7 @@ function exportCurrentCsv() {
     ...currentReport.campaigns.map((campaign) => [
       campaign.name,
       campaign.objective,
-      campaign.status,
+      formatCampaignStatus(campaign.status),
       campaign.spend,
       campaign.impressions,
       campaign.reach,
