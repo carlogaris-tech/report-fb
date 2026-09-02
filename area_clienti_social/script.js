@@ -21,13 +21,15 @@ const barChart = document.querySelector("#barChart");
 const engagementGrid = document.querySelector("#engagementGrid");
 const aiInsights = document.querySelector("#aiInsights");
 const followerChart = document.querySelector("#followerChart");
+const demographicGrid = document.querySelector("#demographicGrid");
 const chartButtons = Array.from(document.querySelectorAll("[data-chart-metric]"));
+const rangePresetButtons = Array.from(document.querySelectorAll("[data-range-preset]"));
 const exportCsv = document.querySelector("#exportCsv");
 
 const useMockMetaApi = false;
 const mockDateRange = {
   from: "2026-04-01",
-  to: "2026-07-31",
+  to: isoDate(new Date()),
 };
 
 const monthNames = {
@@ -173,6 +175,7 @@ let currentConnectionMode = "mock";
 let selectedCampaignId = "all";
 let campaignOptionsCache = [];
 let activeReportRequestId = 0;
+let shouldAutoSelectLatestCampaign = true;
 
 function escapeHtml(text) {
   const div = document.createElement("div");
@@ -261,6 +264,7 @@ function normalizeDaily(item) {
       revenue: Number(item[10]) || 0,
       followersGained: Number(item[11]) || 0,
       followersLost: Number(item[12]) || 0,
+      cpc: Number(item[13]) || 0,
       _hasImpressions: item.length > 4,
       _hasReach: item.length > 5,
       _hasLikes: item.length > 6,
@@ -270,15 +274,20 @@ function normalizeDaily(item) {
       _hasRevenue: item.length > 10,
       _hasFollowersGained: item.length > 11,
       _hasFollowersLost: item.length > 12,
+      _hasCpc: item.length > 13,
     };
   }
 
+  const clicks = Number(item.clicks) || 0;
+  const spend = Number(item.spend) || 0;
+
   return {
     date: item.date || item.date_start || "",
-    spend: Number(item.spend) || 0,
+    spend,
     impressions: Number(item.impressions) || 0,
     reach: Number(item.reach) || 0,
-    clicks: Number(item.clicks) || 0,
+    clicks,
+    cpc: Number(item.cpc) || (clicks > 0 ? spend / clicks : 0),
     likes: Number(item.likes || item.post_reactions || item.reactions) || 0,
     comments: Number(item.comments) || 0,
     shares: Number(item.shares) || 0,
@@ -296,6 +305,7 @@ function normalizeDaily(item) {
     _hasRevenue: hasMetric(item, ["revenue", "purchase_value"]),
     _hasFollowersGained: hasMetric(item, ["followersGained", "followers_gained", "follows"]),
     _hasFollowersLost: hasMetric(item, ["followersLost", "followers_lost", "unfollows"]),
+    _hasCpc: hasMetric(item, ["cpc"]),
   };
 }
 
@@ -317,6 +327,7 @@ function enrichDailyMetrics(campaign, daily) {
       ? day.followersGained
       : Math.round(day.leads * 0.32 + day.clicks * 0.018);
     const followersLost = day._hasFollowersLost ? day.followersLost : Math.round(day.clicks * 0.006);
+    const cpc = day._hasCpc ? day.cpc : day.clicks > 0 ? day.spend / day.clicks : 0;
 
     return {
       ...day,
@@ -327,6 +338,7 @@ function enrichDailyMetrics(campaign, daily) {
       shares,
       followersGained,
       followersLost,
+      cpc,
       purchases: day._hasPurchases ? day.purchases : Math.round(campaign.purchases * leadWeight),
       revenue: day._hasRevenue ? day.revenue : Number((campaign.revenue * leadWeight).toFixed(2)),
     };
@@ -337,6 +349,7 @@ function normalizeCampaign(campaign) {
   const clicks = Number(campaign.clicks) || 0;
   const impressions = Number(campaign.impressions) || 0;
   const spend = Number(campaign.spend) || 0;
+  const cpc = Number(campaign.cpc) || (clicks > 0 ? spend / clicks : 0);
   const leads = Number(campaign.leads || campaign.results || 0) || 0;
   const likes = Number(campaign.likes || campaign.post_reactions || campaign.reactions || 0) || 0;
   const comments = Number(campaign.comments || 0) || 0;
@@ -352,6 +365,7 @@ function normalizeCampaign(campaign) {
     impressions,
     reach: Number(campaign.reach) || 0,
     clicks,
+    cpc,
     likes,
     comments,
     shares,
@@ -391,6 +405,12 @@ function isoDate(date) {
 function addDays(value, amount) {
   const date = new Date(`${value}T00:00:00`);
   date.setDate(date.getDate() + amount);
+  return isoDate(date);
+}
+
+function addMonths(value, amount) {
+  const date = new Date(`${value}T00:00:00`);
+  date.setMonth(date.getMonth() + amount);
   return isoDate(date);
 }
 
@@ -483,6 +503,41 @@ function getQuickRange(report, period) {
   return { from: addDays(max, -29), to: max };
 }
 
+function getPresetRange(preset) {
+  const to = mockDateRange.to || isoDate(new Date());
+
+  if (preset === "1m") {
+    return { from: addMonths(to, -1), to };
+  }
+
+  if (preset === "3m") {
+    return { from: addMonths(to, -3), to };
+  }
+
+  if (preset === "6m") {
+    return { from: addMonths(to, -6), to };
+  }
+
+  return { from: "2024-01-01", to };
+}
+
+function applyRange(range) {
+  dateFrom.value = range.from;
+  dateTo.value = range.to;
+}
+
+function resetCampaignSelection() {
+  selectedCampaignId = "all";
+  campaignSelect.value = "all";
+}
+
+function setDateInputBounds() {
+  const max = mockDateRange.to || isoDate(new Date());
+  [dateFrom, dateTo].forEach((input) => {
+    input.max = max;
+  });
+}
+
 function syncDateInputsFromPeriod(report) {
   if (dateFrom.value && dateTo.value) return;
   const range = getQuickRange(report, "last_30d");
@@ -537,6 +592,11 @@ function getCampaignForRange(campaign, range, reportRange = {}) {
       acc.impressions += day.impressions;
       acc.reach += day.reach;
       acc.clicks += day.clicks;
+      if (day.cpc > 0) {
+        const cpcWeight = day.clicks || 1;
+        acc._cpcWeighted += day.cpc * cpcWeight;
+        acc._cpcWeight += cpcWeight;
+      }
       acc.likes += day.likes;
       acc.comments += day.comments;
       acc.shares += day.shares;
@@ -553,6 +613,9 @@ function getCampaignForRange(campaign, range, reportRange = {}) {
       impressions: 0,
       reach: 0,
       clicks: 0,
+      cpc: 0,
+      _cpcWeighted: 0,
+      _cpcWeight: 0,
       likes: 0,
       comments: 0,
       shares: 0,
@@ -567,7 +630,15 @@ function getCampaignForRange(campaign, range, reportRange = {}) {
 
   if (usesFullReportRange) {
     filteredCampaign.reach = campaign.reach;
+    filteredCampaign.cpc = campaign.cpc || filteredCampaign.cpc;
+  } else if (filteredCampaign._cpcWeight > 0) {
+    filteredCampaign.cpc = filteredCampaign._cpcWeighted / filteredCampaign._cpcWeight;
+  } else {
+    filteredCampaign.cpc = filteredCampaign.clicks > 0 ? filteredCampaign.spend / filteredCampaign.clicks : 0;
   }
+
+  delete filteredCampaign._cpcWeighted;
+  delete filteredCampaign._cpcWeight;
 
   return filteredCampaign;
 }
@@ -584,6 +655,10 @@ function getFilteredReport(report) {
 
   return {
     ...report,
+    demographics:
+      selectedCampaignId === "all"
+        ? report.demographics || []
+        : (report.demographics || []).filter((item) => item.campaign_id === selectedCampaignId),
     campaigns:
       selectedCampaignId === "all"
         ? dateFilteredCampaigns
@@ -599,6 +674,20 @@ function normalizeCampaignOption(campaign) {
     objective: campaign.objective || "-",
     created_time: campaign.created_time || "",
     updated_time: campaign.updated_time || "",
+  };
+}
+
+function normalizeDemographic(item) {
+  return {
+    campaign_id: item.campaign_id || item.campaignId || "",
+    campaign_name: item.campaign_name || item.campaignName || "",
+    age: item.age || "Non specificato",
+    gender: item.gender || "Non specificato",
+    impressions: Number(item.impressions) || 0,
+    reach: Number(item.reach) || 0,
+    clicks: Number(item.clicks) || 0,
+    spend: Number(item.spend) || 0,
+    cpc: Number(item.cpc) || 0,
   };
 }
 
@@ -644,6 +733,7 @@ function normalizeReport(payload, fallback) {
     date_start: payload?.date_start || fallback?.date_start || mockDateRange.from,
     date_stop: payload?.date_stop || fallback?.date_stop || mockDateRange.to,
     comparison: payload?.comparison || null,
+    demographics: (payload?.demographics || fallback?.demographics || []).map(normalizeDemographic),
     availableCampaigns: sourceAvailableCampaigns.map(normalizeCampaignOption),
     campaigns: sourceCampaigns.map(normalizeCampaign),
   };
@@ -656,6 +746,11 @@ function getTotals(report) {
       acc.impressions += campaign.impressions;
       acc.reach += campaign.reach;
       acc.clicks += campaign.clicks;
+      if (campaign.cpc > 0) {
+        const cpcWeight = campaign.clicks || 1;
+        acc._cpcWeighted += campaign.cpc * cpcWeight;
+        acc._cpcWeight += cpcWeight;
+      }
       acc.likes += campaign.likes;
       acc.comments += campaign.comments;
       acc.shares += campaign.shares;
@@ -671,6 +766,8 @@ function getTotals(report) {
       impressions: 0,
       reach: 0,
       clicks: 0,
+      _cpcWeighted: 0,
+      _cpcWeight: 0,
       likes: 0,
       comments: 0,
       shares: 0,
@@ -683,13 +780,20 @@ function getTotals(report) {
   );
 
   totals.ctr = totals.impressions > 0 ? (totals.clicks / totals.impressions) * 100 : 0;
-  totals.cpc = totals.clicks > 0 ? totals.spend / totals.clicks : 0;
+  totals.cpc =
+    totals._cpcWeight > 0
+      ? totals._cpcWeighted / totals._cpcWeight
+      : totals.clicks > 0
+        ? totals.spend / totals.clicks
+        : 0;
   totals.cpl = totals.leads > 0 ? totals.spend / totals.leads : 0;
   totals.roas = totals.spend > 0 ? totals.revenue / totals.spend : 0;
   totals.engagement = totals.likes + totals.comments + totals.shares;
   totals.engagementRate =
     totals.reach > 0 ? (totals.engagement / totals.reach) * 100 : 0;
   totals.netFollowers = totals.followersGained - totals.followersLost;
+  delete totals._cpcWeighted;
+  delete totals._cpcWeight;
   return totals;
 }
 
@@ -748,6 +852,12 @@ function renderCampaignOptions(report) {
     ),
   ].join("");
   campaignSelect.value = selectedCampaignId;
+}
+
+function getLatestCampaignOption(report) {
+  const campaignOptions =
+    campaignOptionsCache.length > 0 ? campaignOptionsCache : report.availableCampaigns || report.campaigns;
+  return campaignOptions.find((campaign) => campaign.status === "ACTIVE") || campaignOptions[0] || null;
 }
 
 function renderStatus(mode, detail) {
@@ -817,7 +927,7 @@ function renderCampaigns(report) {
   campaignTable.innerHTML = report.campaigns
     .map((campaign) => {
       const ctr = campaign.impressions > 0 ? (campaign.clicks / campaign.impressions) * 100 : 0;
-      const cpc = campaign.clicks > 0 ? campaign.spend / campaign.clicks : 0;
+      const cpc = campaign.cpc || (campaign.clicks > 0 ? campaign.spend / campaign.clicks : 0);
       const paused = campaign.status !== "ACTIVE";
 
       return `
@@ -871,7 +981,7 @@ function renderEngagement(totals, report) {
 
 function getCampaignEfficiency(campaign) {
   const ctr = campaign.impressions > 0 ? (campaign.clicks / campaign.impressions) * 100 : 0;
-  const cpc = campaign.clicks > 0 ? campaign.spend / campaign.clicks : 0;
+  const cpc = campaign.cpc || (campaign.clicks > 0 ? campaign.spend / campaign.clicks : 0);
   const contentCost = campaign.leads > 0 ? campaign.spend / campaign.leads : 0;
   const engagementRate =
     campaign.reach > 0
@@ -961,8 +1071,8 @@ function getComparisonItems(comparison) {
   if (!comparison?.current || !comparison?.previous) return [];
   const current = comparison.current;
   const previous = comparison.previous;
-  const currentCpc = current.clicks > 0 ? current.spend / current.clicks : 0;
-  const previousCpc = previous.clicks > 0 ? previous.spend / previous.clicks : 0;
+  const currentCpc = current.cpc || (current.clicks > 0 ? current.spend / current.clicks : 0);
+  const previousCpc = previous.cpc || (previous.clicks > 0 ? previous.spend / previous.clicks : 0);
 
   return [
     {
@@ -1205,6 +1315,69 @@ function renderFollowerChart(report) {
     .join("");
 }
 
+function aggregateByDemographic(items, key) {
+  const totals = new Map();
+
+  (items || []).forEach((item) => {
+    const label = item[key] || "Non specificato";
+    const current = totals.get(label) || {
+      label,
+      reach: 0,
+      impressions: 0,
+      clicks: 0,
+      spend: 0,
+    };
+
+    current.reach += item.reach;
+    current.impressions += item.impressions;
+    current.clicks += item.clicks;
+    current.spend += item.spend;
+    totals.set(label, current);
+  });
+
+  return Array.from(totals.values()).sort((a, b) => b.reach - a.reach);
+}
+
+function renderDemographicList(title, items) {
+  const max = Math.max(...items.map((item) => item.reach), 1);
+
+  return `
+    <article class="demographic-card">
+      <h3>${escapeHtml(title)}</h3>
+      ${
+        items.length > 0
+          ? items
+              .slice(0, 6)
+              .map((item) => {
+                const percentage = Math.max(4, (item.reach / max) * 100);
+                return `
+                  <div class="demographic-row">
+                    <div>
+                      <strong>${escapeHtml(item.label)}</strong>
+                      <span>${formatNumber(item.reach)} persone raggiunte</span>
+                    </div>
+                    <i style="width: ${percentage}%"></i>
+                  </div>
+                `;
+              })
+              .join("")
+          : '<p class="demographic-empty">Dato non disponibile da Meta per il periodo selezionato.</p>'
+      }
+    </article>
+  `;
+}
+
+function renderFollowerDemographics(report) {
+  const demographics = report.demographics || [];
+  const ageItems = aggregateByDemographic(demographics, "age");
+  const genderItems = aggregateByDemographic(demographics, "gender");
+
+  demographicGrid.innerHTML = `
+    ${renderDemographicList("Eta", ageItems)}
+    ${renderDemographicList("Genere", genderItems)}
+  `;
+}
+
 function renderDashboard(mode = "demo", detail = "") {
   const totals = getTotals(currentReport);
   const active = currentReport.campaigns.filter((campaign) => campaign.status === "ACTIVE").length;
@@ -1228,6 +1401,7 @@ function renderDashboard(mode = "demo", detail = "") {
   renderCampaigns(currentReport);
   renderChart(currentReport);
   renderFollowerChart(currentReport);
+  renderFollowerDemographics(currentReport);
 }
 
 function randomInt(min, max) {
@@ -1415,7 +1589,15 @@ function buildUnavailableReport(clientId, range, previousReport = null) {
 }
 
 function setReportLoading(isLoading) {
-  [campaignSelect, confirmCampaign, dateFrom, dateTo, applyDateFilter, exportCsv].forEach((control) => {
+  [
+    campaignSelect,
+    confirmCampaign,
+    dateFrom,
+    dateTo,
+    applyDateFilter,
+    exportCsv,
+    ...rangePresetButtons,
+  ].forEach((control) => {
     if (control) control.disabled = isLoading;
   });
 
@@ -1491,6 +1673,21 @@ async function loadReport() {
     currentFullReport = normalizeReport(payload, fallback);
     syncDateInputsFromPeriod(currentFullReport);
     renderCampaignOptions(currentFullReport);
+
+    if (shouldAutoSelectLatestCampaign) {
+      shouldAutoSelectLatestCampaign = false;
+      const latestCampaign = getLatestCampaignOption(currentFullReport);
+      const latestRange = getCampaignMonthRange(latestCampaign);
+
+      if (latestCampaign?.id && latestRange) {
+        selectedCampaignId = latestCampaign.id;
+        renderCampaignOptions(currentFullReport);
+        applyRange(latestRange);
+        await loadReport();
+        return;
+      }
+    }
+
     currentReport = getFilteredReport(currentFullReport);
     renderDashboard("live", "Report aggiornato.");
   } catch (error) {
@@ -1513,6 +1710,8 @@ function initializeReport() {
   currentClient = clients[0];
   fixedClientName.textContent = currentClient.name;
   selectedCampaignId = "all";
+  shouldAutoSelectLatestCampaign = true;
+  setDateInputBounds();
   currentFullReport = normalizeReport(fallbackReports[currentClient.id], fallbackReports[currentClient.id]);
   syncDateInputsFromPeriod(currentFullReport);
   renderCampaignOptions(currentFullReport);
@@ -1588,8 +1787,7 @@ confirmCampaign.addEventListener("click", () => {
   const campaignRange = getCampaignMonthRange(selectedCampaign);
 
   if (campaignRange) {
-    dateFrom.value = campaignRange.from;
-    dateTo.value = campaignRange.to;
+    applyRange(campaignRange);
     loadReport();
     return;
   }
@@ -1597,15 +1795,21 @@ confirmCampaign.addEventListener("click", () => {
   loadReport();
 });
 applyDateFilter.addEventListener("click", () => {
+  resetCampaignSelection();
   loadReport();
 });
 dateFrom.addEventListener("change", () => {
-  selectedCampaignId = "all";
-  campaignSelect.value = "all";
+  resetCampaignSelection();
 });
 dateTo.addEventListener("change", () => {
-  selectedCampaignId = "all";
-  campaignSelect.value = "all";
+  resetCampaignSelection();
+});
+rangePresetButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    resetCampaignSelection();
+    applyRange(getPresetRange(button.dataset.rangePreset));
+    loadReport();
+  });
 });
 exportCsv.addEventListener("click", exportCurrentCsv);
 
